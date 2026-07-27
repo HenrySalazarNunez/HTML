@@ -89,7 +89,7 @@ function initDashboardCharts() {
             type: 'doughnut',
             data: {
                 labels: ['Completed', 'Remaining'],
-                datasets: [{ data:[75, 25], backgroundColor: ['#a855f7', '#222'], borderWidth: 0 }]
+                datasets: [{ data:, backgroundColor: ['#a855f7', '#222'], borderWidth: 0 }]
             },
             options: { circumference: 180, rotation: -90, plugins: { legend: { display: false } }, cutout: '80%' }
         });
@@ -101,7 +101,7 @@ function initDashboardCharts() {
             type: 'bar',
             data: {
                 labels: ['M', 'T', 'W', 'T', 'F'],
-                datasets: [{ data:[45, 60, 55, 70, 65], backgroundColor: '#a855f7' }]
+                datasets: [{ data:, backgroundColor: '#a855f7' }]
             },
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { display: false } }, plugins: { legend: { display: false } } }
         });
@@ -114,7 +114,7 @@ function initDashboardCharts() {
             type: 'doughnut',
             data: {
                 labels: ['Completed', 'Remaining'],
-                datasets: [{ data:[60, 40], backgroundColor: ['#fb923c', '#222'], borderWidth: 0 }]
+                datasets: [{ data:, backgroundColor: ['#fb923c', '#222'], borderWidth: 0 }]
             },
             options: { circumference: 180, rotation: -90, plugins: { legend: { display: false } }, cutout: '80%' }
         });
@@ -126,7 +126,7 @@ function initDashboardCharts() {
             type: 'bar',
             data: {
                 labels: ['M', 'T', 'W', 'T', 'F'],
-                datasets: [{ data:[30, 40, 35, 50, 45], backgroundColor: '#fb923c' }]
+                datasets: [{ data:, backgroundColor: '#fb923c' }]
             },
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { display: false } }, plugins: { legend: { display: false } } }
         });
@@ -139,7 +139,7 @@ function initDashboardCharts() {
             type: 'doughnut',
             data: {
                 labels: ['Completed', 'Remaining'],
-                datasets: [{ data:[80, 20], backgroundColor: ['#60a5fa', '#222'], borderWidth: 0 }]
+                datasets: [{ data:, backgroundColor: ['#60a5fa', '#222'], borderWidth: 0 }]
             },
             options: { circumference: 180, rotation: -90, plugins: { legend: { display: false } }, cutout: '80%' }
         });
@@ -151,7 +151,7 @@ function initDashboardCharts() {
             type: 'bar',
             data: {
                 labels: ['M', 'T', 'W', 'T', 'F'],
-                datasets: [{ data:[20, 25, 22, 30, 28], backgroundColor: '#60a5fa' }]
+                datasets: [{ data:, backgroundColor: '#60a5fa' }]
             },
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { display: false } }, plugins: { legend: { display: false } } }
         });
@@ -162,7 +162,7 @@ function initDashboardCharts() {
     if (ctxQ1Replen) {
         new Chart(ctxQ1Replen.getContext('2d'), {
             type: 'pie',
-            data: { datasets: [{ data:[40, 35, 25], backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899'], borderWidth: 0 }] }
+            data: { datasets: [{ data:, backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899'], borderWidth: 0 }] }
         });
     }
 
@@ -170,7 +170,7 @@ function initDashboardCharts() {
     if (ctxQ1Stow) {
         new Chart(ctxQ1Stow.getContext('2d'), {
             type: 'pie',
-            data: { datasets: [{ data:[50, 30, 20], backgroundColor: ['#fb923c', '#ef4444', '#f59e0b'], borderWidth: 0 }] }
+            data: { datasets: [{ data:, backgroundColor: ['#fb923c', '#ef4444', '#f59e0b'], borderWidth: 0 }] }
         });
     }
 
@@ -178,7 +178,7 @@ function initDashboardCharts() {
     if (ctxQ2Replen) {
         new Chart(ctxQ2Replen.getContext('2d'), {
             type: 'pie',
-            data: { datasets: [{ data:[60, 25, 15], backgroundColor: ['#10b981', '#3b82f6', '#6b7280'], borderWidth: 0 }] }
+            data: { datasets: [{ data:, backgroundColor: ['#10b981', '#3b82f6', '#6b7280'], borderWidth: 0 }] }
         });
     }
 
@@ -186,7 +186,7 @@ function initDashboardCharts() {
     if (ctxQ2Stow) {
         new Chart(ctxQ2Stow.getContext('2d'), {
             type: 'pie',
-            data: { datasets: [{ data:[45, 35, 20], backgroundColor: ['#6366f1', '#a855f7', '#ec4899'], borderWidth: 0 }] }
+            data: { datasets: [{ data:, backgroundColor: ['#6366f1', '#a855f7', '#ec4899'], borderWidth: 0 }] }
         });
     }
 
@@ -207,7 +207,7 @@ function initDashboardCharts() {
         .catch(err => console.error("Cloud connection failed:", err));
 }
 
-// Auto-run chart initialization instantly upon script execution execution properties
+// Auto-run chart initialization instantly upon script execution
 if (isDashboardPage && localStorage.getItem('memberAccessStatus') === 'granted') {
     initDashboardCharts();
 }
