@@ -136,20 +136,28 @@ function initDashboardCharts() {
         });
     }
 
-    const cloudExcelUrl = "https://" + "raw.githubusercontent.com" + "/HenrySalazarNunez/1dc-replen-history/main/Developer.xlsm";
-    if (typeof XLSX === 'undefined') return;
+    // Fetch the Excel workbook served alongside this site and read its values.
+    const cloudExcelUrl = "Developer.xlsm";
+    if (typeof XLSX === 'undefined') {
+        console.warn("XLSX library not loaded; skipping Excel fetch.");
+        return;
+    }
 
     fetch(cloudExcelUrl)
-        .then(response => response.arrayBuffer())
+        .then(response => {
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            return response.arrayBuffer();
+        })
         .then(buffer => {
             const data = new Uint8Array(buffer);
             const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames;
+            console.log("Workbook sheets loaded:", workbook.SheetNames);
+            const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
-            const excelRows = XLSX.utils.sheet_to_json(worksheet);
-            console.log("Master Spreadsheet Rows Loaded:", excelRows);
+            const excelRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            console.log("Master Spreadsheet values loaded from '" + firstSheetName + "':", excelRows);
         })
-        .catch(err => console.error("Cloud connection failed:", err));
+        .catch(err => console.error("Excel fetch failed:", err));
 }
 
 if (isDashboardPage && localStorage.getItem('memberAccessStatus') === 'granted') {
