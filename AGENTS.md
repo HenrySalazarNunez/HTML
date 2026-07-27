@@ -22,17 +22,23 @@ Then open `http://localhost:8000/1-father.html`.
 ### Lint / test / build
 None exist. There is nothing to lint, test, or build.
 
+### How the pieces connect
+`3-hollyspirit.js` is the single engine that wires everything together:
+- **Login:** on `1-father.html` it attaches a handler to the "Verify Identity"
+  button. Entering the demo passkey `1dc-operations` (constant `ACCESS_KEY`)
+  sets `localStorage.memberAccessStatus = 'granted'`, hides the gatekeeper and
+  reveals the protected content.
+- **Excel:** `loadWorkbook()` fetches `Developer.xlsm` (SheetJS). On the portal
+  it fills the "System Entry Logs" list (one entry per sheet + row counts) and
+  wires the "Export Sheet (.csv)" button to download the `Database` sheet as CSV.
+- **Charts:** Chart.js renders the portal gauge/pie and all dashboard gauges,
+  bars and pies.
+- **Dashboard guard:** `1.1-dashboard.html` redirects back to the portal unless
+  `memberAccessStatus === 'granted'`.
+
 ### Non-obvious gotchas (verified during setup)
-- The "Verify Identity" button on `1-father.html` has **no JavaScript click
-  handler**, so the login form does not grant access on its own. To view the
-  protected dashboard during testing, set the flag in the browser console:
-  `localStorage.setItem('memberAccessStatus','granted')` then open
-  `1.1-dashboard.html`. Without this flag the dashboard alerts and redirects
-  back to `1-father.html`.
 - Chart.js and SheetJS (XLSX) are loaded from `cdn.jsdelivr.net`, so the app
   needs outbound internet access for charts and Excel parsing to work.
-- The dashboard web-fetches `Developer.xlsm` from the **same origin** (a
-  relative URL), so it only works when the file is served over HTTP (e.g. the
+- The Excel fetch uses a **same-origin relative URL** (`Developer.xlsm`), so it
+  only works when the files are served over HTTP (e.g. the
   `python3 -m http.server` dev server), not when opening the HTML via `file://`.
-  The parsed workbook values are logged to the browser console
-  (`Workbook sheets loaded:` / `Master Spreadsheet values loaded ...`).
