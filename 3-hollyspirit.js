@@ -201,7 +201,7 @@ function initDashboardCharts() {
         .then(buffer => {
             const data = new Uint8Array(buffer);
             const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
+            const firstSheetName = workbook.SheetNames;
             const worksheet = workbook.Sheets[firstSheetName];
             const excelRows = XLSX.utils.sheet_to_json(worksheet);
             console.log("Master Spreadsheet Rows Loaded:", excelRows);
