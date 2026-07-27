@@ -30,8 +30,7 @@
         <div class="dashboard-card text-center">
             <h3>Pallet Replen</h3>
             <div class="gauge-placeholder" style="position: relative; width: 100%; max-height: 100px; margin: 5px auto;">
-                <!-- Fixed: Added canvas target for your visual gauge chart -->
-                <canvas id="palletReplenGaugeChart"></canvas>
+                <canvas id="dashboardGaugeChart"></canvas>
             </div>
             <div>
                 <span class="giant-metric metric-purple" id="palletReplenRate">8.0</span>
@@ -48,9 +47,8 @@
                     <p style="margin: 2px 0;">Jobs: <strong id="palletReplenJobs" style="color: #c084fc;">44</strong></p>
                 </div>
             </div>
-            <!-- Fixed: Added canvas target for your bar chart volume indicator -->
-            <div class="bar-chart-viewport" id="palletReplenBarChart" style="position: relative; width: 100%; height: 60px; background: none; border: none;">
-                <canvas id="palletReplenVolumeBarChart"></canvas>
+            <div class="bar-chart-viewport" style="position: relative; width: 100%; height: 60px; background: none; border: none;">
+                <canvas id="dashboardBarChart"></canvas>
             </div>
         </div>
 
@@ -79,8 +77,7 @@
         <div class="dashboard-card text-center">
             <h3>Case Replen</h3>
             <div class="gauge-placeholder" style="position: relative; width: 100%; max-height: 100px; margin: 5px auto;">
-                <!-- Fixed: Added canvas target for your visual gauge chart -->
-                <canvas id="caseReplenGaugeChart"></canvas>
+                <canvas id="gaugeChart"></canvas>
             </div>
             <div>
                 <span class="giant-metric metric-orange" id="caseReplenRate">101</span>
@@ -97,8 +94,7 @@
                     <p style="margin: 2px 0;">Jobs: <strong id="caseReplenJobs" style="color: #c084fc;">146</strong></p>
                 </div>
             </div>
-            <!-- Fixed: Added canvas target for your bar chart volume indicator -->
-            <div class="bar-chart-viewport" id="caseReplenBarChart" style="position: relative; width: 100%; height: 60px; background: none; border: none;">
+            <div class="bar-chart-viewport" style="position: relative; width: 100%; height: 60px; background: none; border: none;">
                 <canvas id="caseReplenVolumeBarChart"></canvas>
             </div>
         </div>
@@ -137,4 +133,61 @@
                 </div>
             </div>
         </div>
-        
+
+
+        <!-- ================= ROW 3: PALLET STOW OPERATIONS ================= -->
+        <!-- CARD 11: Pallet Stow Rate Gauge -->
+        <div class="dashboard-card text-center">
+            <h3>Pallet Stow</h3>
+            <div class="gauge-placeholder" style="position: relative; width: 100%; max-height: 100px; margin: 5px auto;">
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div>
+                <span class="giant-metric metric-blue" id="palletStowRate">7.2</span>
+                <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8;">Rate</p>
+            </div>
+        </div>
+
+        <!-- CARD 12: Pallet Stow Volume Tracker -->
+        <div class="dashboard-card">
+            <div class="card-header-split">
+                <h3>Pallet Stow Vol</h3>
+                <div class="right-metrics" style="text-align: right; font-size: 13px;">
+                    <p style="margin: 2px 0;">RTS: <strong id="palletStowRts" style="color: #60a5fa;">12</strong></p>
+                    <p style="margin: 2px 0;">Cross: <strong id="palletStowCross" style="color: #f97316;">80</strong></p>
+                </div>
+            </div>
+            <div class="bar-chart-viewport" style="position: relative; width: 100%; height: 60px; background: none; border: none;">
+                <canvas id="palletStowVolumeBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- CARD 13: Lady Justice Art Frame -->
+        <div class="dashboard-card art-card lady-justice">
+            <h3>Pallet Stow Rate</h3>
+        </div>
+
+        <!-- CARD 14: Marcus Aurelius Imperial Quote Board -->
+        <div class="dashboard-card art-card marcus-aurelius">
+            <div class="card-header-split">
+                <h3>Pallet Stow WIP</h3>
+                <p>Hours: <strong>PNE4</strong></p>
+            </div>
+            <div class="quote-text-layout">
+                <p class="philosophy-quote">"Accept the things to which fate binds you, and love the people with whom fate brings you together, but do so with all your heart."</p>
+                <span class="quote-author">— Marcus Aurelius</span>
+            </div>
+        </div>
+
+        <!-- CARD 15: General Operations System Ledger -->
+        <div class="dashboard-card placeholder-card">
+            <h3>System Status</h3>
+            <p class="status-alert" style="color: #4ade80; margin-top: 15px; font-size: 14px;">🟢 All operational metrics running within optimal thresholds.</p>
+        </div>
+
+
+        <!-- ================= ROW 4: FAST START PIE OPERATIONS ================= -->
+        <!-- CARD 16: Fast Start Replen Q1 -->
+        <div class="dashboard-card text-center gradient-purple">
+            <div class="card-header-split">
+                <h3 style="color: #fff;">Fast Start Replen Q1</h3>

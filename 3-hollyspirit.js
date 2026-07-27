@@ -8,10 +8,7 @@
 const isDashboardPage = window.location.href.includes('1.1-dashboard.html');
 
 if (isDashboardPage) {
-    // Check if the browser cabinet holds the authorized digital token
     const accessStatus = localStorage.getItem('memberAccessStatus');
-    
-    // If they don't have the digital token, instantly kick them back to the gate
     if (accessStatus !== 'granted') {
         alert('Access Denied. Redirecting to Secure Entrance Gate.');
         window.location.href = '1-father.html';
@@ -26,41 +23,27 @@ const protectedContent = document.getElementById('protectedContent');
 const secretKeyInput = document.getElementById('secretKey');
 const accessButton = document.getElementById('accessButton');
 const logList = document.getElementById('logList');
-const downloadExcelBtn = document.getElementById('downloadExcelBtn');
 
-// THE IDENTITY ROSTER: Maps unique, customized keys directly to names
 const USER_REGISTRY = {
     "IloveMyWork!": "System Creator (Henry)",
     "I love my work": "System Creator (Henry)",
-    "Henry777": "Henry Salazar",             // Your custom unique signature key
-    "John123": "John Doe",                    // Coworker Key 1
-    "Alpha777": "Team Alpha Leader",           // Coworker Key 2
-    "Manager99": "Shift Operations Manager"    // Coworker Key 3
+    "Henry777": "Henry Salazar",             
+    "John123": "John Doe",                    
+    "Alpha777": "Team Alpha Leader",           
+    "Manager99": "Shift Operations Manager"    
 };
 
 if (accessButton) {
     accessButton.addEventListener('click', () => {
-        // Safe check to make sure the text field exists before pulling its value
-        if (!secretKeyInput) {
-            alert("Error: Input element with id 'secretKey' missing from HTML framework layout.");
-            return;
-        }
-
-        // Read text and remove any accidental edge trailing spaces
         const userTyped = secretKeyInput.value.trim();
 
-        // Validate if the input matches any key inside our custom roster dictionary
         if (USER_REGISTRY[userTyped]) {
             const employeeName = USER_REGISTRY[userTyped];
-
-            // 1. Issue the digital token keycard into browser memory
             localStorage.setItem('memberAccessStatus', 'granted');
 
-            // 2. Clear out the lock filter screen overlay
             if (gatekeeper) gatekeeper.style.display = 'none';
             if (protectedContent) protectedContent.setAttribute('style', 'display: block !important;');
 
-            // 3. SECURE TIME AUDIT: Record the exact sign-in second with their name
             const currentTimestamp = new Date().toLocaleString();
             const entryMessage = `✅ Entry: ${employeeName} signed in at ${currentTimestamp}`;
 
@@ -69,26 +52,19 @@ if (accessButton) {
             localStorage.setItem('accessLogs', JSON.stringify(savedLogs));
 
             renderLogs();
-            
-            // 4. TRIGGER DASHBOARD CHARTS AUTO-LOAD ENGINE
             initDashboardCharts();
-            
-            secretKeyInput.value = ''; // Empty out input field for security
-
+            secretKeyInput.value = ''; 
         } else {
-            // FAIL: If the key isn't in the identity vault roster
             alert('Access Denied. Invalid Private Identification Key.');
             secretKeyInput.value = ''; 
         }
     });
 }
 
-// Helper to grab saved logs from the hard drive database and show them in HTML
 function renderLogs() {
     if (!logList) return;
     let savedLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
     logList.innerHTML = ''; 
-
     savedLogs.forEach(log => {
         const li = document.createElement('li');
         li.className = 'log-item';
@@ -102,75 +78,136 @@ if (logList) {
 }
 
 // ---------------------------------------------------
-// 3. LIVE EXCEL FETCH ENGINE & AUTOMATED VISUALIZATION LOOP
+// 3. MASTER OPERATIONS MULTI-CHART DRAWING ENGINE
 // ---------------------------------------------------
 function initDashboardCharts() {
-    // A. SET UP THE GAUGE CHART (Doughnut styled as a speedometer half-circle)
-    const ctxGauge = document.getElementById('gaugeChart');
-    if (ctxGauge) {
-        const gaugeChart = new Chart(ctxGauge.getContext('2d'), {
+    
+    // --- ROW 1: PALLET REPLEN TRACKERS ---
+    const ctxPalletGauge = document.getElementById('dashboardGaugeChart');
+    if (ctxPalletGauge) {
+        new Chart(ctxPalletGauge.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: ['Completed', 'Remaining'],
-                datasets: [{
-                    data:, // Hardcoded template values to avoid script syntax parsing errors
-                    backgroundColor: ['#059669', '#222'], // Green indicator, Dark background slot
-                    borderWidth: 0
-                }]
+                datasets: [{ data:[75, 25], backgroundColor: ['#a855f7', '#222'], borderWidth: 0 }]
             },
-            options: {
-                circumference: 180, // Cut the full layout circle directly in half
-                rotation: -90,      // Orient the opening downward like a traditional dial speedometer
-                plugins: { legend: { display: false } },
-                cutout: '80%'       // Makes the center hollow to create the needle track look
-            }
+            options: { circumference: 180, rotation: -90, plugins: { legend: { display: false } }, cutout: '80%' }
         });
     }
 
-    // B. SET UP THE PIE CHART
-    const ctxPie = document.getElementById('pieChart');
-    if (ctxPie) {
-        const pieChart = new Chart(ctxPie.getContext('2d'), {
-            type: 'pie',
+    const ctxPalletBar = document.getElementById('dashboardBarChart');
+    if (ctxPalletBar) {
+        new Chart(ctxPalletBar.getContext('2d'), {
+            type: 'bar',
             data: {
-                labels: ['Category A', 'Category B', 'Category C'],
-                datasets: [{
-                    data:, // Hardcoded template values to avoid script syntax parsing errors
-                    backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899'], // Blue, Purple, Pink colors
-                    borderColor: '#111',
-                    borderWidth: 2
-                }]
+                labels: ['M', 'T', 'W', 'T', 'F'],
+                datasets: [{ data:[45, 60, 55, 70, 65], backgroundColor: '#a855f7' }]
             },
-            options: {
-                plugins: { legend: { labels: { color: '#ccc' } } }
-            }
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { display: false } }, plugins: { legend: { display: false } } }
         });
     }
 
-    // C. AUTO-FETCH DATA STREAM FROM YOUR EXCEL CLOUD SHEET
-    const cloudExcelUrl = "https://githubusercontent.com";
-
-    if (typeof XLSX === 'undefined') {
-        console.warn("SheetJS XLSX engine not loaded yet. Skipping cloud document stream pull.");
-        return;
+    // --- ROW 2: CASE REPLEN TRACKERS ---
+    const ctxCaseGauge = document.getElementById('gaugeChart');
+    if (ctxCaseGauge) {
+        new Chart(ctxCaseGauge.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Remaining'],
+                datasets: [{ data:[60, 40], backgroundColor: ['#fb923c', '#222'], borderWidth: 0 }]
+            },
+            options: { circumference: 180, rotation: -90, plugins: { legend: { display: false } }, cutout: '80%' }
+        });
     }
+
+    const ctxCaseBar = document.getElementById('caseReplenVolumeBarChart');
+    if (ctxCaseBar) {
+        new Chart(ctxCaseBar.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['M', 'T', 'W', 'T', 'F'],
+                datasets: [{ data:[30, 40, 35, 50, 45], backgroundColor: '#fb923c' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { display: false } }, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // --- ROW 3: PALLET STOW TRACKERS ---
+    const ctxStowGauge = document.getElementById('pieChart');
+    if (ctxStowGauge) {
+        new Chart(ctxStowGauge.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Remaining'],
+                datasets: [{ data:[80, 20], backgroundColor: ['#60a5fa', '#222'], borderWidth: 0 }]
+            },
+            options: { circumference: 180, rotation: -90, plugins: { legend: { display: false } }, cutout: '80%' }
+        });
+    }
+
+    const ctxStowBar = document.getElementById('palletStowVolumeBarChart');
+    if (ctxStowBar) {
+        new Chart(ctxStowBar.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['M', 'T', 'W', 'T', 'F'],
+                datasets: [{ data:[20, 25, 22, 30, 28], backgroundColor: '#60a5fa' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false }, x: { display: false } }, plugins: { legend: { display: false } } }
+        });
+    }
+
+    // --- ROW 4: FAST START PIE QUADRANTS ---
+    const ctxQ1Replen = document.getElementById('dashboardPieChart');
+    if (ctxQ1Replen) {
+        new Chart(ctxQ1Replen.getContext('2d'), {
+            type: 'pie',
+            data: { datasets: [{ data:[40, 35, 25], backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899'], borderWidth: 0 }] }
+        });
+    }
+
+    const ctxQ1Stow = document.getElementById('replenQ1PieCanvas');
+    if (ctxQ1Stow) {
+        new Chart(ctxQ1Stow.getContext('2d'), {
+            type: 'pie',
+            data: { datasets: [{ data:[50, 30, 20], backgroundColor: ['#fb923c', '#ef4444', '#f59e0b'], borderWidth: 0 }] }
+        });
+    }
+
+    const ctxQ2Replen = document.getElementById('palletStowQ1PieCanvas');
+    if (ctxQ2Replen) {
+        new Chart(ctxQ2Replen.getContext('2d'), {
+            type: 'pie',
+            data: { datasets: [{ data:[60, 25, 15], backgroundColor: ['#10b981', '#3b82f6', '#6b7280'], borderWidth: 0 }] }
+        });
+    }
+
+    const ctxQ2Stow = document.getElementById('replenQ2PieCanvas');
+    if (ctxQ2Stow) {
+        new Chart(ctxQ2Stow.getContext('2d'), {
+            type: 'pie',
+            data: { datasets: [{ data:[45, 35, 20], backgroundColor: ['#6366f1', '#a855f7', '#ec4899'], borderWidth: 0 }] }
+        });
+    }
+
+    // --- CLOUD EXCEL DOCUMENT DATA CONTEXT PULL ---
+    const cloudExcelUrl = "https://githubusercontent.com";
+    if (typeof XLSX === 'undefined') return;
 
     fetch(cloudExcelUrl)
-        .then(response => {
-            if (!response.ok) throw new Error("Cloud spreadsheet stream unreadable");
-            return response.arrayBuffer();
-        })
+        .then(response => response.arrayBuffer())
         .then(buffer => {
             const data = new Uint8Array(buffer);
             const workbook = XLSX.read(data, { type: 'array' });
-            
-            // Access the first data sheet inside the file
             const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
-            
-            // Turn row data metrics directly into clean, actionable Javascript arrays
             const excelRows = XLSX.utils.sheet_to_json(worksheet);
-            console.log("Cloud Dashboard Data Connection Active:", excelRows);
+            console.log("Master Spreadsheet Rows Loaded:", excelRows);
         })
-        .catch(err => console.error("Cloud Dashboard data synchronization failed:", err));
+        .catch(err => console.error("Cloud connection failed:", err));
+}
+
+// Auto-run chart initialization instantly upon script execution execution properties
+if (isDashboardPage && localStorage.getItem('memberAccessStatus') === 'granted') {
+    initDashboardCharts();
 }
