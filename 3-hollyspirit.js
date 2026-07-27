@@ -1,5 +1,5 @@
 // ===================================================
-// THE HOLY SPIRIT: MEMBERS-ONLY IDENTITY VAULT
+// THE HOLY SPIRIT: MASTER OPERATIONS CHART ENGINE
 // ===================================================
 
 const isDashboardPage = window.location.href.includes('1.1-dashboard.html');
@@ -12,65 +12,7 @@ if (isDashboardPage) {
     }
 }
 
-const gatekeeper = document.getElementById('gatekeeper');
-const protectedContent = document.getElementById('protectedContent');
-const secretKeyInput = document.getElementById('secretKey');
-const accessButton = document.getElementById('accessButton');
-const logList = document.getElementById('logList');
-
-const USER_REGISTRY = {
-    "IloveMyWork!": "System Creator (Henry)",
-    "I love my work": "System Creator (Henry)",
-    "Henry777": "Henry Salazar",             
-    "John123": "John Doe",                    
-    "Alpha777": "Team Alpha Leader",           
-    "Manager99": "Shift Operations Manager"    
-};
-
-if (accessButton) {
-    accessButton.addEventListener('click', () => {
-        const userTyped = secretKeyInput.value.trim();
-
-        if (USER_REGISTRY[userTyped]) {
-            const employeeName = USER_REGISTRY[userTyped];
-            localStorage.setItem('memberAccessStatus', 'granted');
-
-            if (gatekeeper) gatekeeper.style.display = 'none';
-            if (protectedContent) protectedContent.setAttribute('style', 'display: block !important;');
-
-            const currentTimestamp = new Date().toLocaleString();
-            const entryMessage = `✅ Entry: ${employeeName} signed in at ${currentTimestamp}`;
-
-            let savedLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-            savedLogs.unshift(entryMessage);
-            localStorage.setItem('accessLogs', JSON.stringify(savedLogs));
-
-            renderLogs();
-            initDashboardCharts();
-            secretKeyInput.value = ''; 
-        } else {
-            alert('Access Denied. Invalid Private Identification Key.');
-            secretKeyInput.value = ''; 
-        }
-    });
-}
-
-function renderLogs() {
-    if (!logList) return;
-    let savedLogs = JSON.parse(localStorage.getItem('accessLogs')) || [];
-    logList.innerHTML = ''; 
-    savedLogs.forEach(log => {
-        const li = document.createElement('li');
-        li.className = 'log-item';
-        li.textContent = log;
-        logList.appendChild(li);
-    });
-}
-
-if (logList) {
-    renderLogs();
-}
-
+// SIMPLIFIED AUTOMATED CHART INITIALIZATION LOOPS
 function initDashboardCharts() {
     
     // --- ROW 1: PALLET REPLEN TRACKERS ---
@@ -124,7 +66,8 @@ function initDashboardCharts() {
     }
 
     // --- ROW 3: PALLET STOW TRACKERS ---
-    const ctxStowGauge = document.getElementById('pieChart');
+    // UNIQUE NAME ASSIGNED: Changed from 'pieChart' to prevent layout crashes
+    const ctxStowGauge = document.getElementById('palletStowGaugeChart');
     if (ctxStowGauge) {
         new Chart(ctxStowGauge.getContext('2d'), {
             type: 'doughnut',
@@ -193,10 +136,8 @@ function initDashboardCharts() {
         });
     }
 
-    const cloudExcelUrl = "https://" + "://githubusercontent.com" + "/HenrySalazarNunez/1dc-replen-history/main/Developer.xlsm";
-if (typeof XLSX === 'undefined') return;
-
-fetch(cloudExcelUrl)
+    const cloudExcelUrl = "https://" + "raw.githubusercontent.com" + "/HenrySalazarNunez/1dc-replen-history/main/Developer.xlsm";
+    if (typeof XLSX === 'undefined') return;
 
     fetch(cloudExcelUrl)
         .then(response => response.arrayBuffer())
@@ -214,4 +155,3 @@ fetch(cloudExcelUrl)
 if (isDashboardPage && localStorage.getItem('memberAccessStatus') === 'granted') {
     initDashboardCharts();
 }
-
