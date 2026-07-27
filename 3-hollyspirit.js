@@ -193,8 +193,10 @@ function initDashboardCharts() {
         });
     }
 
-    const cloudExcelUrl = "https://githubusercontent.com";
-    if (typeof XLSX === 'undefined') return;
+    const cloudExcelUrl = "https://" + "://githubusercontent.com" + "/HenrySalazarNunez/1dc-replen-history/main/Developer.xlsm";
+if (typeof XLSX === 'undefined') return;
+
+fetch(cloudExcelUrl)
 
     fetch(cloudExcelUrl)
         .then(response => response.arrayBuffer())
