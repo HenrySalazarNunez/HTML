@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations Mission Control Dashboard</title>
+    <!-- The Son dresses the dashboard automatically -->
+    <link rel="stylesheet" href="2-son.css">
+    
+    <!-- External Engines for Real-Time Graphics and Cloud Excel Connection -->
+    <script src="https://jsdelivr.net"></script>
+    <script src="https://jsdelivr.net"></script>
+</head>
+<body style="display: block;">
+
+    <!-- Header bar featuring your Classy Live Sync Countdown Tracker -->
+    <div class="dashboard-header">
+        <h1>📊 Operations Mission Control</h1>
+        <div class="countdown-badge" style="float: right; font-size: 14px; background: #111; padding: 6px 12px; border-radius: 4px; border: 1px solid #333;">
+            🔄 Next Live Excel Sync: <span id="countdownClock" style="color: #fb923c; font-weight: bold; font-family: monospace;">15:00</span>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+
+    <!-- Main Grid Layout Architecture (4 Rows x 5 Columns = 20 Cards) -->
+    <div class="mission-control-grid">
+        
+        <!-- ================= ROW 1: PALLET REPLEN OPERATIONS ================= -->
+        <!-- CARD 1: Pallet Replen Rate Gauge -->
+        <div class="dashboard-card text-center">
+            <h3>Pallet Replen</h3>
+            <div class="gauge-placeholder" style="position: relative; width: 100%; max-height: 100px; margin: 5px auto;">
+                <!-- Fixed: Added canvas target for your visual gauge chart -->
+                <canvas id="palletReplenGaugeChart"></canvas>
+            </div>
+            <div>
+                <span class="giant-metric metric-purple" id="palletReplenRate">8.0</span>
+                <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8;">Rate</p>
+            </div>
+        </div>
+
+        <!-- CARD 2: Pallet Replen Volume Tracker -->
+        <div class="dashboard-card">
+            <div class="card-header-split">
+                <h3>Pallet Replen Vol</h3>
+                <div class="right-metrics" style="text-align: right; font-size: 13px;">
+                    <p style="margin: 2px 0;">Units: <strong id="palletReplenUnits" style="color: #60a5fa;">12,432</strong></p>
+                    <p style="margin: 2px 0;">Jobs: <strong id="palletReplenJobs" style="color: #c084fc;">44</strong></p>
+                </div>
+            </div>
+            <!-- Fixed: Added canvas target for your bar chart volume indicator -->
+            <div class="bar-chart-viewport" id="palletReplenBarChart" style="position: relative; width: 100%; height: 60px; background: none; border: none;">
+                <canvas id="palletReplenVolumeBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- CARD 3: Eye of Horus Art Frame -->
+        <div class="dashboard-card art-card eye-of-horus">
+            <h3>Pallet Replen Rate</h3>
+        </div>
+
+        <!-- CARD 4: Mona Lisa Art Frame -->
+        <div class="dashboard-card art-card mona-lisa">
+            <div class="card-header-split">
+                <h3>Pallet Replen WIP</h3>
+                <p>Hours: <strong>PNE4</strong></p>
+            </div>
+        </div>
+
+        <!-- CARD 5: Three Faces Process Forecasting Panel -->
+        <div class="dashboard-card panel-purple" style="background: linear-gradient(135deg, #311542 0%, #1f2937 100%);">
+            <h3>Three Faces Process</h3>
+            <p class="panel-desc" style="color: #94a3b8; font-size: 13px; margin-top: 15px; line-height: 1.5;">Forecasting shift requirements based on volume patterns.</p>
+        </div>
+
+
+        <!-- ================= ROW 2: CASE REPLEN OPERATIONS ================= -->
+        <!-- CARD 6: Case Replen Rate Gauge -->
+        <div class="dashboard-card text-center">
+            <h3>Case Replen</h3>
+            <div class="gauge-placeholder" style="position: relative; width: 100%; max-height: 100px; margin: 5px auto;">
+                <!-- Fixed: Added canvas target for your visual gauge chart -->
+                <canvas id="caseReplenGaugeChart"></canvas>
+            </div>
+            <div>
+                <span class="giant-metric metric-orange" id="caseReplenRate">101</span>
+                <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8;">Rate</p>
+            </div>
+        </div>
+
+        <!-- CARD 7: Case Replen Volume Tracker -->
+        <div class="dashboard-card">
+            <div class="card-header-split">
+                <h3>Case Replen Vol</h3>
+                <div class="right-metrics" style="text-align: right; font-size: 13px;">
+                    <p style="margin: 2px 0;">Units: <strong id="caseReplenUnits" style="color: #fb923c;">80,980</strong></p>
+                    <p style="margin: 2px 0;">Jobs: <strong id="caseReplenJobs" style="color: #c084fc;">146</strong></p>
+                </div>
+            </div>
+            <!-- Fixed: Added canvas target for your bar chart volume indicator -->
+            <div class="bar-chart-viewport" id="caseReplenBarChart" style="position: relative; width: 100%; height: 60px; background: none; border: none;">
+                <canvas id="caseReplenVolumeBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- CARD 8: Patriotic Flag Art Frame -->
+        <div class="dashboard-card art-card american-flag">
+            <h3>Case Replen Rate</h3>
+        </div>
+
+        <!-- CARD 9: School of Athens Philosophy Frame -->
+        <div class="dashboard-card art-card school-of-athens">
+            <div class="card-header-split">
+                <h3>Case Replen WIP</h3>
+                <p>Hours: <strong>PNE4</strong></p>
+            </div>
+        </div>
+
+        <!-- CARD 10: Pallet Stow Empty Space Matrix -->
+        <div class="dashboard-card capacity-card">
+            <div class="card-header-split">
+                <h3>Pallet Stow Empty Space</h3>
+                <span class="total-badge" style="background-color: #1e3a8a; color: #60a5fa; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Total: 207</span>
+            </div>
+            <div class="zone-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px;">
+                <div class="zone-box" style="background-color: #111827; border: 1px solid #3b82f6; border-radius: 4px; padding: 8px; text-align: center;">
+                    <h5 style="margin: 0 0 4px 0; font-size: 10px; color: #94a3b8;">Zone 3</h5>
+                    <p id="zone3Val" style="margin: 0; font-size: 18px; font-weight: bold; color: #3b82f6;">60</p>
+                </div>
+                <div class="zone-box" style="background-color: #111827; border: 1px solid #3b82f6; border-radius: 4px; padding: 8px; text-align: center;">
+                    <h5 style="margin: 0 0 4px 0; font-size: 10px; color: #94a3b8;">Zone 2</h5>
+                    <p id="zone2Val" style="margin: 0; font-size: 18px; font-weight: bold; color: #3b82f6;">92</p>
+                </div>
+                <div class="zone-box" style="background-color: #111827; border: 1px solid #3b82f6; border-radius: 4px; padding: 8px; text-align: center;">
+                    <h5 style="margin: 0 0 4px 0; font-size: 10px; color: #94a3b8;">Zone 1</h5>
+                    <p id="zone1Val" style="margin: 0; font-size: 18px; font-weight: bold; color: #3b82f6;">55</p>
+                </div>
+            </div>
+        </div>
+        

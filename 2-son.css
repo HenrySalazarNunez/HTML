@@ -1,0 +1,223 @@
+/* ==========================================
+   THE SON: MASTER ARCHITECTURE & STYLE SHEET
+   ========================================== */
+
+/* --- CORE SYSTEM ROOT VARIABLES --- */
+body {
+    background-color: #0b111e; /* Deep operational dark background */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e2e8f0;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* --- SECURE GATEWAY PAGE STYLES --- */
+#gatekeeper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100vw;
+}
+
+.lock-box {
+    background-color: #1a1a1e;
+    border: 1px solid #2d2d34;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    max-width: 400px;
+    text-align: center;
+}
+
+input {
+    background-color: #0f0f11;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    width: 80%;
+    margin-bottom: 20px;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+}
+
+input:focus {
+    border-color: #a855f7;
+}
+
+/* --- SYSTEM BUTTONS & REACTION ACTIONS --- */
+button {
+    background-color: #a855f7;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+button:hover {
+    background-color: #9333ea;
+    transform: translateY(-1px);
+}
+
+/* --- EXECUTIVE DASHBOARD HEADER LAYER --- */
+.dashboard-header {
+    width: 100%;
+    padding: 20px 40px;
+    background-color: #111827;
+    border-bottom: 2px solid #1f2937;
+    box-sizing: border-box;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: white;
+    letter-spacing: -0.5px;
+}
+
+/* --- MAIN 20-CARD OPERATIONS GRID ENGINE --- */
+.mission-control-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 Columns */
+    gap: 15px; /* Spacing between cards */
+    width: 96vw;
+    margin: 25px auto;
+    box-sizing: border-box;
+}
+
+/* Individual Panel Container Cards */
+.dashboard-card {
+    background-color: #1f2937; /* Clean slate block fill */
+    border: 2px solid #374151; /* Grid frame border lines */
+    border-radius: 6px;
+    padding: 16px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Double-sided metrics text alignment splitters */
+.card-header-split {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #374151;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.dashboard-card h3 {
+    margin: 0;
+    font-size: 13px;
+    color: #93c5fd; /* Operations Blue text */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Gauge Sizing Text Values */
+.giant-metric {
+    font-size: 42px;
+    font-weight: bold;
+    display: block;
+    margin-top: 25px;
+}
+
+.metric-purple { color: #c084fc; }
+.metric-orange { color: #fb923c; }
+.metric-blue { color: #60a5fa; }
+
+/* --- INTERNAL CHART DISPLAY PLACEHOLDERS --- */
+.bar-chart-viewport {
+    background-color: #111827;
+    border: 1px dashed #4b5563;
+    height: 100px;
+    border-radius: 4px;
+    margin-top: 10px;
+    background-image: linear-gradient(0deg, #1f2937 10%, transparent 10%);
+    background-size: 100% 20px; /* Mimics grid volume bar charts lines */
+}
+
+.pie-chart-viewport {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: conic-gradient(#a855f7 0% 35%, #3b82f6 35% 70%, #f97316 70% 100%);
+    margin: 15px auto 0 auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* --- THE CAPACITY THREE-ZONE GRID FRAMEWORK --- */
+.zone-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.zone-box {
+    background-color: #111827;
+    border: 1px solid #3b82f6;
+    border-radius: 4px;
+    padding: 8px;
+    text-align: center;
+}
+
+.zone-box h5 {
+    margin: 0 0 4px 0;
+    font-size: 10px;
+    color: #94a3b8;
+}
+
+.zone-box p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #3b82f6;
+}
+
+/* --- PANEL FILL GRADIENTS & TEXT ACCENTS --- */
+.gradient-purple { background: linear-gradient(135deg, #311542 0%, #1f2937 100%) !important; }
+.gradient-sunset { background: linear-gradient(135deg, #441414 0%, #b45309 100%) !important; }
+.gradient-clouds { background: linear-gradient(135deg, #1e293b 0%, #475569 100%) !important; }
+
+.total-badge { background-color: #1e3a8a; color: #60a5fa; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+.total-badge-gold { background-color: #d97706; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+
+.philosophy-quote { font-style: italic; color: #94a3b8; font-size: 12px; line-height: 1.5; margin: 15px 0 5px 0; }
+.quote-author { color: #a855f7; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+
+.total-metrics-list p { margin: 6px 0; font-family: monospace; font-size: 13px; }
+.text-center { text-align: center; }
+.nav-link { color: #a855f7; text-decoration: none; font-weight: bold; font-size: 14px; }
+.nav-link:hover { text-decoration: underline; }
+.dashboard-footer { margin: 20px auto 40px auto; }
+/* --- LIVE CHART DASHBOARD LAYOUT ENHANCEMENTS --- */
+.dashboard-grid {
+    width: 100%;
+    max-width: 800px;
+    margin: 25px auto !important;
+    justify-content: center;
+}
+
+.chart-card {
+    background-color: #1a1a1e !important;   /* Matches your lockbox gray style */
+    border: 1px solid #2d2d34 !important;    /* Matches your lockbox border style */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Smooth drop shadow depth style */
+    transition: transform 0.2s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-2px);
+}

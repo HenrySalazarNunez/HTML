@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Members-Only Portal</title>
+    <!-- Linking the Son for styling -->
+    <link rel="stylesheet" href="2-son.css">
+</head>
+<body>
+
+    <!-- The Exclusive Gatekeeper Screen -->
+    <div id="gatekeeper">
+        <div class="lock-box">
+            <h2>🔒 Members Only Portal</h2>
+            <p>Please enter your private key to access the workspace.</p>
+            <input type="password" id="secretKey" placeholder="Enter passkey...">
+            <button id="accessButton">Verify Identity</button>
+        </div>
+    </div>
+
+    <!-- The Main Protected Work Content (Hidden by Default!) -->
+    <div id="protectedContent" style="display: none;">
+        <h1>Welcome to the Inner Circle</h1>
+        <p>This structure is the Father, styled by the Son, given life by the Holy Spirit.</p>
+
+        <!-- Load Chart.js and the Excel Engine Library from the Web CDN -->
+        <script src="https://jsdelivr.net"></script>
+        <script src="https://jsdelivr.net"></script>
+
+        <!-- Dashboard Container Grid Area -->
+        <div class="dashboard-grid" style="display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
+            
+            <!-- Gauge Component Card (Doughnut styled as a speedometer half-circle) -->
+            <div class="chart-card" style="flex: 1; min-width: 280px; background: #111; padding: 20px; border-radius: 8px; border: 1px solid #333; text-align: center;">
+                <h3 style="color: #fff; margin-bottom: 15px; font-size: 16px;">📈 Operational Capacity (Gauge)</h3>
+                <div style="position: relative; max-width: 250px; margin: 0 auto;">
+                    <canvas id="gaugeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Pie Component Card -->
+            <div class="chart-card" style="flex: 1; min-width: 280px; background: #111; padding: 20px; border-radius: 8px; border: 1px solid #333; text-align: center;">
+                <h3 style="color: #fff; margin-bottom: 15px; font-size: 16px;">📊 Inventory Distribution (Pie)</h3>
+                <div style="position: relative; max-width: 250px; margin: 0 auto;">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>        
+        
+        <!-- The System Entry Logs Terminal -->
+        <div class="audit-card">
+            <h3>📋 System Entry Logs</h3>
+            <ul id="logList" style="list-style: none; padding: 0; max-height: 150px; overflow-y: auto;">
+                <!-- Logs inject here -->
+            </ul>
+            <button id="downloadExcelBtn" style="margin-top: 15px; width: 100%; background-color: #059669;">
+                📥 Export Sheet (.csv)
+            </button>
+        </div>
+
+        <br>
+        <a href="1.1-dashboard.html">Click here to jump to the Dashboard</a>
+    </div>
+
+    <!-- Linking the Holy Spirit for the validation code -->
+    <script src="3-hollyspirit.js"></script>
+</body>
+</html>
+
+
+
+
+
