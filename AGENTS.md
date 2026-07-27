@@ -29,7 +29,10 @@ None exist. There is nothing to lint, test, or build.
   `localStorage.setItem('memberAccessStatus','granted')` then open
   `1.1-dashboard.html`. Without this flag the dashboard alerts and redirects
   back to `1-father.html`.
-- The `<script src="https://jsdelivr.net"></script>` tags are placeholders and
-  do **not** load Chart.js or the XLSX library, so `Chart`/`XLSX` are undefined
-  and the chart canvases render blank. Page layout and styling still render
-  fine. This is a code-level issue, not an environment problem.
+- Chart.js and SheetJS (XLSX) are loaded from `cdn.jsdelivr.net`, so the app
+  needs outbound internet access for charts and Excel parsing to work.
+- The dashboard web-fetches `Developer.xlsm` from the **same origin** (a
+  relative URL), so it only works when the file is served over HTTP (e.g. the
+  `python3 -m http.server` dev server), not when opening the HTML via `file://`.
+  The parsed workbook values are logged to the browser console
+  (`Workbook sheets loaded:` / `Master Spreadsheet values loaded ...`).
