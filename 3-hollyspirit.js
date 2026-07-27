@@ -212,3 +212,4 @@ function initDashboardCharts() {
 if (isDashboardPage && localStorage.getItem('memberAccessStatus') === 'granted') {
     initDashboardCharts();
 }
+
