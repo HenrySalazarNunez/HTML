@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operations Mission Control (standalone)</title>
+<style>
+:root{--bg:#0b111e;--panel:#1f2937;--panel-2:#111827;--border:#374151;--text:#e2e8f0;--muted:#94a3b8;--purple:#c084fc;--orange:#fb923c;--blue:#60a5fa;--green:#4ade80;}
+*{box-sizing:border-box;}
+body{background:var(--bg);font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:var(--text);margin:0;min-height:100vh;}
+#gate{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;}
+.lock-box{background:#1a1a1e;border:1px solid #2d2d34;padding:40px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:420px;width:100%;text-align:center;}
+.lock-box h2{margin-top:0;}
+input{background:#0f0f11;border:1px solid #3f3f46;color:#fff;padding:12px;border-radius:6px;width:100%;margin:10px 0 16px;font-size:16px;text-align:center;outline:none;}
+input:focus{border-color:var(--purple);}
+button{background:#a855f7;color:#fff;border:none;padding:12px 24px;font-size:16px;border-radius:6px;cursor:pointer;font-weight:600;transition:.2s;}
+button:hover{background:#9333ea;transform:translateY(-1px);}
+.hint{font-size:12px;color:#6b7280;margin-top:14px;}
+.hint code{color:#a855f7;}
+.err{color:#f87171;font-size:14px;margin:10px 0 0;min-height:18px;}
+.dashboard-header{padding:16px 26px;background:var(--panel-2);border-bottom:2px solid #1f2937;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.dashboard-header h1{margin:0;font-size:21px;color:#fff;letter-spacing:-.5px;}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.sync-badge{font-size:13px;background:#111;padding:8px 14px;border-radius:6px;border:1px solid #333;}
+.sync-badge #countdownClock{color:var(--orange);font-weight:bold;font-family:monospace;}
+.sync-badge #lastSync{color:var(--muted);}
+.mini-btn{padding:8px 12px;font-size:13px;background:#059669;}
+.mini-btn:hover{background:#047857;}
+.mini-btn.ghost{background:#374151;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:24px 26px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;display:flex;flex-direction:column;min-height:210px;}
+.card h3{margin:0 0 4px;font-size:13px;color:#93c5fd;text-transform:uppercase;letter-spacing:.5px;}
+.card-sub{font-size:12px;color:var(--muted);margin:0 0 12px;}
+.gauge-wrap{position:relative;width:100%;max-width:210px;height:100px;margin:0 auto;}
+.gauge-value{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:30px;font-weight:800;}
+.metric-purple{color:var(--purple);}.metric-orange{color:var(--orange);}.metric-blue{color:var(--blue);}
+.stat-row{display:flex;justify-content:space-around;margin:10px 0;text-align:center;}
+.stat{flex:1;}.stat .num{font-size:20px;font-weight:700;color:#fff;display:block;}.stat .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;}
+.chart-box{position:relative;width:100%;height:90px;margin-top:auto;}
+.pie-box{position:relative;width:100%;height:175px;margin-top:8px;}
+.total-list p{margin:8px 0;font-family:monospace;font-size:14px;}
+.total-list .big{font-size:34px;font-weight:800;color:#fff;margin:4px 0 12px;display:block;}
+.text-purple{color:var(--purple);}.text-orange{color:var(--orange);}.text-blue{color:var(--blue);}
+.status-ok{color:var(--green);font-size:13px;margin-top:12px;}
+.footer{padding:6px 26px 34px;color:var(--muted);font-size:13px;}
+@media(max-width:900px){.grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div id="gate">
+    <div class="lock-box">
+        <h2>&#128274; Members Only Portal</h2>
+        <p>Enter your private key to open the live operations dashboard.</p>
+        <input type="password" id="secretKey" placeholder="Enter passkey...">
+        <button id="accessButton">Verify Identity</button>
+        <p class="hint">Demo keys: <code>Henry777</code>, <code>John123</code>, <code>Manager99</code></p>
+        <p id="gateError" class="err"></p>
+    </div>
+</div>
+
+<div id="app" style="display:none;">
+    <div class="dashboard-header">
+        <h1>&#128202; Operations Mission Control</h1>
+        <div class="header-right">
+            <span class="sync-badge">&#128260; Next Excel Sync: <span id="countdownClock">15:00</span> &nbsp;|&nbsp; <span id="lastSync">Loading&hellip;</span></span>
+            <button id="downloadExcelBtn" class="mini-btn">&#128229; CSV</button>
+            <button id="signOutBtn" class="mini-btn ghost">Sign out</button>
+        </div>
+    </div>
+    <div class="grid">
+        <div class="card"><h3>Pallet Replen</h3><p class="card-sub">Rate (units/hr avg)</p>
+            <div class="gauge-wrap"><canvas id="gaugePalletReplen"></canvas><div class="gauge-value metric-purple" id="palletReplenRate">--</div></div>
+            <div class="stat-row"><div class="stat"><span class="num" id="palletReplenUnits">--</span><span class="lbl">Units</span></div><div class="stat"><span class="num" id="palletReplenJobs">--</span><span class="lbl">Jobs</span></div></div>
+            <div class="chart-box"><canvas id="barPalletReplen"></canvas></div></div>
+        <div class="card"><h3>Case Replen</h3><p class="card-sub">Rate (units/hr avg)</p>
+            <div class="gauge-wrap"><canvas id="gaugeCaseReplen"></canvas><div class="gauge-value metric-orange" id="caseReplenRate">--</div></div>
+            <div class="stat-row"><div class="stat"><span class="num" id="caseReplenUnits">--</span><span class="lbl">Units</span></div><div class="stat"><span class="num" id="caseReplenJobs">--</span><span class="lbl">Jobs</span></div></div>
+            <div class="chart-box"><canvas id="barCaseReplen"></canvas></div></div>
+        <div class="card"><h3>Pallet Stow</h3><p class="card-sub">Rate (units/hr avg)</p>
+            <div class="gauge-wrap"><canvas id="gaugePalletStow"></canvas><div class="gauge-value metric-blue" id="palletStowRate">--</div></div>
+            <div class="stat-row"><div class="stat"><span class="num" id="palletStowRts">--</span><span class="lbl">RTS</span></div><div class="stat"><span class="num" id="palletStowCross">--</span><span class="lbl">Cross</span></div></div>
+            <div class="chart-box"><canvas id="barPalletStow"></canvas></div></div>
+        <div class="card"><h3>Total Units Monitor</h3><p class="card-sub">Aggregate volume from the workbook</p>
+            <div class="total-list"><span class="big" id="totalUnits">--</span>
+                <p>&#128230; Pallet Replen: <strong class="text-purple" id="totalPalletR">--</strong></p>
+                <p>&#128230; Case Replen: <strong class="text-orange" id="totalCaseR">--</strong></p>
+                <p>&#128230; Pallet Stow: <strong class="text-blue" id="totalPalletS">--</strong></p></div>
+            <p class="status-ok" id="systemStatus">&#128994; Awaiting data&hellip;</p></div>
+        <div class="card"><h3>Volume Distribution</h3><p class="card-sub">Share of total operation volume</p><div class="pie-box"><canvas id="pieDistribution"></canvas></div></div>
+        <div class="card"><h3>Hourly Throughput</h3><p class="card-sub">Units per hour (Pallet + Case)</p><div class="pie-box"><canvas id="lineHourly"></canvas></div></div>
+    </div>
+    <div class="footer"><span id="whoami"></span> &middot; <span id="dataSource"></span></div>
+</div>
+
+<!-- Chart.js + SheetJS from CDN (needs internet). Data falls back to the embedded snapshot. -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// Embedded snapshot of Developer.xlsm (so the dashboard shows even when opened
+// as a local file with no workbook next to it).
+const SNAPSHOT = {"labels":["7AM","8AM","9AM","10AM","11AM","12PM","1AM","2AM"],"palletReplen":{"units":441463,"jobs":502,"rate":8.0845,"hourly":[10500,12345,13456,18546,12432,10500,12345,13456]},"caseReplen":{"units":559240,"jobs":1403,"rate":374.13,"hourly":[30500,25780,45090,56780,80980,30500,25780,45090]},"palletStow":{"rts":218866,"cross":897.2,"rate":7.445,"hourly":[10,20,12,3,12,10,20,12]},"rowCount":50};
+
+const EXCEL_URL="Developer.xlsm", STORAGE_KEY="memberAccessStatus", NAME_KEY="memberName", SYNC_SECONDS=15*60;
+const USER_REGISTRY={"IloveMyWork!":"System Creator (Henry)","Henry777":"Henry Salazar","John123":"John Doe","Alpha777":"Team Alpha Leader","Manager99":"Shift Operations Manager"};
+const COL={time:1,palletUnits:2,palletJobs:3,palletRate:8,caseUnits:11,caseJobs:12,caseRate:18,stowRts:21,stowCross:22,stowRate:27};
+const charts={}; let countdownTimer=null;
+
+document.addEventListener("DOMContentLoaded",()=>{
+    const input=document.getElementById("secretKey"), button=document.getElementById("accessButton");
+    const verify=()=>{const name=USER_REGISTRY[(input.value||"").trim()];
+        if(name){localStorage.setItem(STORAGE_KEY,"granted");localStorage.setItem(NAME_KEY,name);input.value="";showApp();}
+        else{document.getElementById("gateError").textContent="Access denied — invalid passkey.";input.value="";}};
+    button.addEventListener("click",verify);
+    input.addEventListener("keydown",e=>{if(e.key==="Enter")verify();});
+    document.getElementById("signOutBtn").addEventListener("click",()=>{localStorage.removeItem(STORAGE_KEY);location.reload();});
+    if(localStorage.getItem(STORAGE_KEY)==="granted")showApp();
+});
+
+function showApp(){
+    document.getElementById("gate").style.display="none";
+    document.getElementById("app").style.display="block";
+    document.getElementById("whoami").textContent="Signed in as "+(localStorage.getItem(NAME_KEY)||"member");
+    wireCsvExport(); syncNow(); startSyncCountdown();
+}
+
+function loadWorkbook(){
+    if(typeof XLSX==="undefined")return Promise.resolve(null);
+    return fetch(EXCEL_URL+"?t="+Date.now(),{cache:"no-store"})
+        .then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.arrayBuffer();})
+        .then(buf=>XLSX.read(new Uint8Array(buf),{type:"array"}))
+        .catch(()=>null);
+}
+function parseDatabase(wb){
+    const name=wb.SheetNames.find(n=>n.trim()==="Database"); if(!name)return null;
+    const ws=wb.Sheets[name], range=XLSX.utils.decode_range(ws["!ref"]);
+    const num=(r,c)=>{const cell=ws[XLSX.utils.encode_cell({r,c})];return cell&&typeof cell.v==="number"?cell.v:null;};
+    const rows=[]; for(let r=range.s.r;r<=range.e.r;r++){if(num(r,COL.time)!==null&&num(r,COL.palletUnits)!==null)rows.push(r);}
+    if(!rows.length)return null;
+    const sum=c=>rows.reduce((a,r)=>a+(num(r,c)||0),0);
+    const avg=c=>{const v=rows.map(r=>num(r,c)).filter(x=>x!==null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;};
+    const ser=(c,n)=>rows.slice(0,n).map(r=>num(r,c)||0);
+    return{labels:rows.slice(0,8).map(r=>fracToHour(num(r,COL.time))),
+        palletReplen:{units:sum(COL.palletUnits),jobs:sum(COL.palletJobs),rate:avg(COL.palletRate),hourly:ser(COL.palletUnits,8)},
+        caseReplen:{units:sum(COL.caseUnits),jobs:sum(COL.caseJobs),rate:avg(COL.caseRate),hourly:ser(COL.caseUnits,8)},
+        palletStow:{rts:sum(COL.stowRts),cross:sum(COL.stowCross),rate:avg(COL.stowRate),hourly:ser(COL.stowRts,8)},rowCount:rows.length};
+}
+function fracToHour(f){let h=Math.round(f*24);const ap=h>=12&&h<24?"PM":"AM";let hr=h%12;if(hr===0)hr=12;return hr+ap;}
+
+function syncNow(){
+    return loadWorkbook().then(wb=>{
+        let m=null, live=false;
+        if(wb){m=parseDatabase(wb); if(m)live=true;}
+        if(!m)m=SNAPSHOT;
+        renderDashboard(m);
+        document.getElementById("dataSource").textContent = live ? "Live from Developer.xlsm" : "Showing built-in snapshot (host next to Developer.xlsm for live data)";
+        setLastSync("Last synced "+new Date().toLocaleTimeString());
+    });
+}
+function setLastSync(t){const el=document.getElementById("lastSync");if(el)el.textContent=t;}
+function startSyncCountdown(){
+    if(countdownTimer)clearInterval(countdownTimer);
+    let remaining=SYNC_SECONDS; const el=document.getElementById("countdownClock");
+    countdownTimer=setInterval(()=>{remaining--;if(remaining<=0){remaining=SYNC_SECONDS;syncNow();}
+        if(el)el.textContent=String(Math.floor(remaining/60)).padStart(2,"0")+":"+String(remaining%60).padStart(2,"0");},1000);
+}
+function renderDashboard(m){
+    const fmt=n=>Math.round(n).toLocaleString();
+    text("palletReplenRate",m.palletReplen.rate.toFixed(1));text("palletReplenUnits",fmt(m.palletReplen.units));text("palletReplenJobs",fmt(m.palletReplen.jobs));
+    text("caseReplenRate",m.caseReplen.rate.toFixed(0));text("caseReplenUnits",fmt(m.caseReplen.units));text("caseReplenJobs",fmt(m.caseReplen.jobs));
+    text("palletStowRate",m.palletStow.rate.toFixed(1));text("palletStowRts",fmt(m.palletStow.rts));text("palletStowCross",fmt(m.palletStow.cross));
+    const stow=m.palletStow.rts+m.palletStow.cross, total=m.palletReplen.units+m.caseReplen.units+stow;
+    text("totalUnits",fmt(total));text("totalPalletR",fmt(m.palletReplen.units));text("totalCaseR",fmt(m.caseReplen.units));text("totalPalletS",fmt(stow));
+    text("systemStatus","\uD83D\uDFE2 "+m.rowCount+" hourly records loaded");
+    if(typeof Chart==="undefined")return;
+    gauge("gaugePalletReplen",m.palletReplen.rate,10,"#c084fc");gauge("gaugeCaseReplen",m.caseReplen.rate,130,"#fb923c");gauge("gaugePalletStow",m.palletStow.rate,10,"#60a5fa");
+    bar("barPalletReplen",m.labels,m.palletReplen.hourly,"#c084fc");bar("barCaseReplen",m.labels,m.caseReplen.hourly,"#fb923c");bar("barPalletStow",m.labels,m.palletStow.hourly,"#60a5fa");
+    upsert("pieDistribution",{type:"doughnut",data:{labels:["Pallet Replen","Case Replen","Pallet Stow"],datasets:[{data:[m.palletReplen.units,m.caseReplen.units,stow],backgroundColor:["#c084fc","#fb923c","#60a5fa"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{color:"#e2e8f0",font:{size:11}}}}}});
+    const tp=m.labels.map((_,i)=>(m.palletReplen.hourly[i]||0)+(m.caseReplen.hourly[i]||0));
+    upsert("lineHourly",{type:"line",data:{labels:m.labels,datasets:[{data:tp,borderColor:"#4ade80",backgroundColor:"rgba(74,222,128,.15)",fill:true,tension:.35,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#94a3b8",font:{size:10}},grid:{display:false}},y:{ticks:{color:"#94a3b8",font:{size:10}},grid:{color:"#1f2937"}}}}});
+}
+function text(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+function gauge(id,value,target,color){const pct=Math.max(0,Math.min(100,value/target*100));upsert(id,{type:"doughnut",data:{labels:["",""],datasets:[{data:[pct,100-pct],backgroundColor:[color,"#222"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,circumference:180,rotation:-90,cutout:"72%",plugins:{legend:{display:false},tooltip:{enabled:false}}}});}
+function bar(id,labels,data,color){upsert(id,{type:"bar",data:{labels,datasets:[{data,backgroundColor:color}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#94a3b8",font:{size:9}},grid:{display:false}},y:{display:false}}}});}
+function wireCsvExport(){const btn=document.getElementById("downloadExcelBtn");if(!btn)return;btn.addEventListener("click",()=>{loadWorkbook().then(wb=>{
+    let csv;
+    if(wb){const n=wb.SheetNames.find(x=>x.trim()==="Database")||wb.SheetNames[0];csv=XLSX.utils.sheet_to_csv(wb.Sheets[n]);}
+    else{csv="Operation,Units,Jobs/Extra,Rate\nPallet Replen,"+SNAPSHOT.palletReplen.units+","+SNAPSHOT.palletReplen.jobs+","+SNAPSHOT.palletReplen.rate+"\nCase Replen,"+SNAPSHOT.caseReplen.units+","+SNAPSHOT.caseReplen.jobs+","+SNAPSHOT.caseReplen.rate+"\nPallet Stow,"+(SNAPSHOT.palletStow.rts+SNAPSHOT.palletStow.cross)+","+SNAPSHOT.palletStow.cross+","+SNAPSHOT.palletStow.rate+"\n";}
+    const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8;"}));const a=document.createElement("a");a.href=url;a.download="Database.csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);});});}
+function upsert(id,config){const el=document.getElementById(id);if(!el)return;if(charts[id])charts[id].destroy();charts[id]=new Chart(el,config);}
+</script>
+</body>
+</html>
