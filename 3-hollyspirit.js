@@ -1,198 +1,201 @@
 // =====================================================================
 //  THE HOLY SPIRIT — the engine that gives life to the Father (HTML),
-//  wears the Son (CSS) and connects everything to the Excel workbook.
+//  wears the Son (CSS), guards the members area, and connects the whole
+//  operation to the Excel workbook (Developer.xlsm).
 //
-//  This single file establishes every connection from zero:
-//    1. Father (HTML)  <-> Son (CSS)     : the pages already <link> the CSS.
-//    2. Father (HTML)  <-> Holy Spirit   : the pages <script> this file.
-//    3. Holy Spirit    <-> Excel file    : loadWorkbook() fetches Developer.xlsm.
-//    4. Login gate     <-> Dashboard     : localStorage flag guards the pages.
+//  This file is a drop-in replacement: it needs NO changes to the HTML
+//  or CSS. It loads the chart / Excel libraries on its own and injects
+//  real <canvas> charts into the existing placeholder <div>s.
 // =====================================================================
 
 // ---- Configuration ---------------------------------------------------
-const ACCESS_KEY = "1dc-operations"; // demo passkey for the members portal
-const EXCEL_URL = "Developer.xlsm";  // workbook served next to this site
+const EXCEL_URL = "Developer.xlsm";
 const STORAGE_KEY = "memberAccessStatus";
 
-// A single cached promise so the workbook is only fetched/parsed once.
-let workbookPromise = null;
+// The identity roster: unique keys -> member name.
+const USER_REGISTRY = {
+    "IloveMyWork!": "System Creator (Henry)",
+    "I love my work": "System Creator (Henry)",
+    "Henry777": "Henry Salazar",
+    "John123": "John Doe",
+    "Alpha777": "Team Alpha Leader",
+    "Manager99": "Shift Operations Manager",
+};
 
-// ---- Page detection --------------------------------------------------
-const isDashboardPage = window.location.pathname.includes("1.1-dashboard");
-const isPortalPage = () => document.getElementById("gatekeeper") !== null;
+const isDashboardPage = window.location.href.includes("1.1-dashboard.html");
 
 // ---- Boot ------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
-    if (isPortalPage()) {
-        initPortalPage();
-    } else if (isDashboardPage) {
+    if (isDashboardPage) {
         initDashboardPage();
+    } else {
+        initPortalPage();
     }
 });
 
 // =====================================================================
-//  CONNECTION 3: THE EXCEL WORKBOOK
+//  LIBRARY LOADER — pulls Chart.js + SheetJS from a local vendor/ copy
+//  if present, otherwise from the jsDelivr CDN. Cached after first call.
 // =====================================================================
+let libsPromise = null;
+function ensureLibraries() {
+    if (libsPromise) return libsPromise;
+    libsPromise = Promise.all([
+        loadFirstAvailable([
+            "vendor/chart.umd.min.js",
+            "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js",
+        ]),
+        loadFirstAvailable([
+            "vendor/xlsx.full.min.js",
+            "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
+        ]),
+    ]);
+    return libsPromise;
+}
+
+function loadFirstAvailable(urls) {
+    return new Promise((resolve, reject) => {
+        let i = 0;
+        (function next() {
+            if (i >= urls.length) return reject(new Error("Could not load: " + urls.join(", ")));
+            const script = document.createElement("script");
+            script.src = urls[i++];
+            script.onload = () => resolve(script.src);
+            script.onerror = () => {
+                script.remove();
+                next();
+            };
+            document.head.appendChild(script);
+        })();
+    });
+}
+
+// =====================================================================
+//  THE EXCEL WORKBOOK
+// =====================================================================
+let workbookPromise = null;
 function loadWorkbook() {
     if (workbookPromise) return workbookPromise;
-
-    if (typeof XLSX === "undefined") {
-        console.warn("XLSX library not loaded — cannot connect to the workbook.");
-        return Promise.resolve(null);
-    }
+    if (typeof XLSX === "undefined") return Promise.resolve(null);
 
     workbookPromise = fetch(EXCEL_URL)
-        .then((response) => {
-            if (!response.ok) throw new Error("HTTP " + response.status);
-            return response.arrayBuffer();
+        .then((r) => {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.arrayBuffer();
         })
-        .then((buffer) => {
-            const workbook = XLSX.read(new Uint8Array(buffer), { type: "array" });
-            console.log("Excel connected — sheets:", workbook.SheetNames);
-            return workbook;
+        .then((buf) => {
+            const wb = XLSX.read(new Uint8Array(buf), { type: "array" });
+            console.log("Excel connected — sheets:", wb.SheetNames);
+            return wb;
         })
         .catch((err) => {
             console.error("Excel fetch failed:", err);
             return null;
         });
-
     return workbookPromise;
 }
 
-function sheetRows(workbook, sheetName) {
-    return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+function wireCsvExport() {
+    const button = document.getElementById("downloadExcelBtn");
+    if (!button) return;
+    button.addEventListener("click", () => {
+        loadWorkbook().then((wb) => {
+            if (!wb) return alert("Workbook not loaded yet — please try again in a moment.");
+            const sheetName = wb.SheetNames.find((n) => n.trim() === "Database") || wb.SheetNames[0];
+            const csv = XLSX.utils.sheet_to_csv(wb.Sheets[sheetName]);
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = sheetName.trim() + ".csv";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        });
+    });
 }
 
 // =====================================================================
-//  CONNECTION 1+2: THE PORTAL (Father + Son + Holy Spirit)
+//  THE PORTAL  (login + access audit log + Excel export)
 // =====================================================================
 function initPortalPage() {
-    const gate = document.getElementById("gatekeeper");
-    const content = document.getElementById("protectedContent");
-    const keyInput = document.getElementById("secretKey");
-    const button = document.getElementById("accessButton");
+    const gatekeeper = document.getElementById("gatekeeper");
+    const protectedContent = document.getElementById("protectedContent");
+    const secretKeyInput = document.getElementById("secretKey");
+    const accessButton = document.getElementById("accessButton");
 
-    const unlock = () => {
-        gate.style.display = "none";
-        content.style.display = "block";
-        onPortalUnlocked();
+    const reveal = () => {
+        if (gatekeeper) gatekeeper.style.display = "none";
+        if (protectedContent) protectedContent.setAttribute("style", "display: block !important;");
+        renderLogs();
     };
 
     const verify = () => {
-        const entered = (keyInput.value || "").trim().toLowerCase();
-        if (entered !== ACCESS_KEY) {
-            showGateError("Access denied — invalid passkey.");
-            return;
+        const typed = (secretKeyInput.value || "").trim();
+        const employeeName = USER_REGISTRY[typed];
+        if (employeeName) {
+            localStorage.setItem(STORAGE_KEY, "granted");
+            recordEntry(employeeName);
+            secretKeyInput.value = "";
+            reveal();
+        } else {
+            alert("Access Denied. Invalid Private Identification Key.");
+            secretKeyInput.value = "";
         }
-        localStorage.setItem(STORAGE_KEY, "granted");
-        unlock();
     };
 
-    button.addEventListener("click", verify);
-    keyInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") verify();
+    if (accessButton) accessButton.addEventListener("click", verify);
+    if (secretKeyInput) {
+        secretKeyInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") verify();
+        });
+    }
+
+    // Connect the workbook so the CSV export button works once revealed.
+    ensureLibraries().then(() => {
+        loadWorkbook();
+        wireCsvExport();
     });
 
-    // Returning members who already unlocked skip the gate.
+    // Returning members who already hold the token skip the gate.
     if (localStorage.getItem(STORAGE_KEY) === "granted") {
-        unlock();
+        reveal();
+    } else {
+        renderLogs();
     }
 }
 
-function showGateError(message) {
-    let el = document.getElementById("gateError");
-    if (!el) {
-        el = document.createElement("p");
-        el.id = "gateError";
-        el.style.cssText = "color:#f87171; font-size:14px; margin:10px 0 0 0;";
-        document.querySelector(".lock-box").appendChild(el);
+function recordEntry(employeeName) {
+    const stamp = new Date().toLocaleString();
+    const logs = JSON.parse(localStorage.getItem("accessLogs")) || [];
+    logs.unshift("Entry: " + employeeName + " signed in at " + stamp);
+    localStorage.setItem("accessLogs", JSON.stringify(logs));
+}
+
+function renderLogs() {
+    const logList = document.getElementById("logList");
+    if (!logList) return;
+    const logs = JSON.parse(localStorage.getItem("accessLogs")) || [];
+    logList.innerHTML = "";
+    if (logs.length === 0) {
+        appendLog(logList, "No entries yet — sign in to create the first audit record.");
+        return;
     }
-    el.textContent = message;
+    logs.forEach((text) => appendLog(logList, "\u2705 " + text));
 }
 
-// Fired once the portal is unlocked: draw charts + connect the workbook.
-function onPortalUnlocked() {
-    renderPortalCharts();
-
-    loadWorkbook().then((workbook) => {
-        if (!workbook) return;
-        populateEntryLogs(workbook);
-        wireCsvExport(workbook);
-    });
-}
-
-function renderPortalCharts() {
-    if (typeof Chart === "undefined") return;
-
-    const gauge = document.getElementById("gaugeChart");
-    if (gauge) {
-        new Chart(gauge, {
-            type: "doughnut",
-            data: {
-                labels: ["Completed", "Remaining"],
-                datasets: [{ data: [72, 28], backgroundColor: ["#a855f7", "#222"], borderWidth: 0 }],
-            },
-            options: { circumference: 180, rotation: -90, cutout: "75%", plugins: { legend: { display: false } } },
-        });
-    }
-
-    const pie = document.getElementById("pieChart");
-    if (pie) {
-        new Chart(pie, {
-            type: "pie",
-            data: {
-                labels: ["Pallet Replen", "Case Replen", "Pallet Stow"],
-                datasets: [{ data: [45, 35, 20], backgroundColor: ["#3b82f6", "#fb923c", "#10b981"], borderWidth: 0 }],
-            },
-        });
-    }
-}
-
-// The workbook drives the "System Entry Logs" terminal.
-function populateEntryLogs(workbook) {
-    const list = document.getElementById("logList");
-    if (!list) return;
-
-    list.innerHTML = "";
-    addLogEntry(list, "Connected to " + EXCEL_URL + " (" + workbook.SheetNames.length + " sheets)");
-
-    workbook.SheetNames.forEach((name) => {
-        const rows = sheetRows(workbook, name);
-        addLogEntry(list, name.trim() + " — " + rows.length + " rows");
-    });
-}
-
-function addLogEntry(list, text) {
+function appendLog(logList, text) {
     const li = document.createElement("li");
-    li.textContent = "› " + text;
-    li.style.cssText = "padding:6px 4px; border-bottom:1px solid #222; font-family:monospace; font-size:13px; color:#93c5fd;";
-    list.appendChild(li);
-}
-
-// The workbook also powers the "Export Sheet (.csv)" button.
-function wireCsvExport(workbook) {
-    const button = document.getElementById("downloadExcelBtn");
-    if (!button) return;
-
-    button.addEventListener("click", () => {
-        const sheetName =
-            workbook.SheetNames.find((n) => n.trim() === "Database") || workbook.SheetNames[0];
-        const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[sheetName]);
-
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const anchor = document.createElement("a");
-        anchor.href = url;
-        anchor.download = sheetName.trim() + ".csv";
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        URL.revokeObjectURL(url);
-    });
+    li.className = "log-item";
+    li.textContent = text;
+    li.style.cssText =
+        "padding:6px 4px; border-bottom:1px solid #222; font-family:monospace; font-size:13px; color:#93c5fd;";
+    logList.appendChild(li);
 }
 
 // =====================================================================
-//  THE DASHBOARD (Father + Son + Holy Spirit + Excel)
+//  THE DASHBOARD  (guarded; injects real charts + live countdown)
 // =====================================================================
 function initDashboardPage() {
     if (localStorage.getItem(STORAGE_KEY) !== "granted") {
@@ -201,58 +204,127 @@ function initDashboardPage() {
         return;
     }
 
-    renderDashboardCharts();
-    loadWorkbook().then((workbook) => {
-        if (workbook) console.log("Dashboard connected to workbook sheets:", workbook.SheetNames);
-    });
+    startCountdown();
+
+    ensureLibraries()
+        .then(() => {
+            renderDashboardCharts();
+            loadWorkbook();
+        })
+        .catch((err) => console.error("Chart libraries failed to load:", err));
 }
 
-function renderDashboardCharts() {
-    if (typeof Chart === "undefined") return;
+function startCountdown() {
+    const el = document.getElementById("countdownClock");
+    if (!el) return;
+    let total = 15 * 60;
+    setInterval(() => {
+        total = total <= 0 ? 15 * 60 : total - 1;
+        const m = String(Math.floor(total / 60)).padStart(2, "0");
+        const s = String(total % 60).padStart(2, "0");
+        el.textContent = m + ":" + s;
+    }, 1000);
+}
 
-    const gaugeConfig = (value, color) => ({
+// ---- Chart config factories -----------------------------------------
+function gaugeConfig(percent, color) {
+    return {
         type: "doughnut",
         data: {
             labels: ["Completed", "Remaining"],
-            datasets: [{ data: [value, 100 - value], backgroundColor: [color, "#222"], borderWidth: 0 }],
+            datasets: [{ data: [percent, 100 - percent], backgroundColor: [color, "#222"], borderWidth: 0 }],
         },
-        options: { circumference: 180, rotation: -90, cutout: "80%", plugins: { legend: { display: false } } },
-    });
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            circumference: 180,
+            rotation: -90,
+            cutout: "75%",
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        },
+    };
+}
 
-    const barConfig = (values, color) => ({
+function barConfig(values, color) {
+    return {
         type: "bar",
-        data: {
-            labels: ["M", "T", "W", "T", "F"],
-            datasets: [{ data: values, backgroundColor: color }],
-        },
+        data: { labels: ["M", "T", "W", "T", "F"], datasets: [{ data: values, backgroundColor: color }] },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: { y: { display: false }, x: { display: false } },
             plugins: { legend: { display: false } },
         },
-    });
+    };
+}
 
-    const pieConfig = (values, colors) => ({
+function pieConfig(values, colors) {
+    return {
         type: "pie",
         data: { labels: ["A", "B", "C"], datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } },
+    };
+}
+
+// Inject a <canvas> into a container (clearing any placeholder background).
+function injectCanvas(container, styleText) {
+    container.style.backgroundImage = "none";
+    container.style.background = "none";
+    container.style.boxShadow = "none";
+    container.style.border = "none";
+    const canvas = document.createElement("canvas");
+    canvas.style.cssText = styleText || "display:block; width:100%; height:100%;";
+    container.appendChild(canvas);
+    return canvas;
+}
+
+function renderDashboardCharts() {
+    // ---- Gauges (injected above the giant metric numbers) ----
+    const gauges = [
+        { metricId: "palletReplenRate", percent: 75, color: "#c084fc" },
+        { metricId: "caseReplenRate", percent: 60, color: "#fb923c" },
+        { metricId: "palletStowRate", percent: 80, color: "#60a5fa" },
+    ];
+    gauges.forEach((g) => {
+        const metric = document.getElementById(g.metricId);
+        if (!metric) return;
+        const holder = metric.closest(".gauge-placeholder") || metric.parentElement;
+        const wrap = document.createElement("div");
+        wrap.style.cssText = "position:relative; width:100%; max-width:150px; height:78px; margin:0 auto;";
+        // Insert into the DOM BEFORE creating the chart so Chart.js can size it.
+        holder.insertBefore(wrap, holder.firstChild);
+        const canvas = document.createElement("canvas");
+        canvas.style.cssText = "display:block; width:100%; height:100%;";
+        wrap.appendChild(canvas);
+        new Chart(canvas, gaugeConfig(g.percent, g.color));
     });
 
-    const charts = [
-        ["dashboardGaugeChart", gaugeConfig(75, "#a855f7")],
-        ["dashboardBarChart", barConfig([45, 60, 55, 70, 65], "#a855f7")],
-        ["gaugeChart", gaugeConfig(60, "#fb923c")],
-        ["caseReplenVolumeBarChart", barConfig([30, 40, 35, 50, 45], "#fb923c")],
-        ["palletStowGaugeChart", gaugeConfig(80, "#60a5fa")],
-        ["palletStowVolumeBarChart", barConfig([50, 55, 60, 45, 65], "#60a5fa")],
-        ["dashboardPieChart", pieConfig([40, 30, 30], ["#3b82f6", "#8b5cf6", "#ec4899"])],
-        ["replenQ1PieCanvas", pieConfig([35, 45, 20], ["#fb923c", "#ef4444", "#f59e0b"])],
-        ["palletStowQ1PieCanvas", pieConfig([50, 25, 25], ["#10b981", "#3b82f6", "#6b7280"])],
-        ["replenQ2PieCanvas", pieConfig([30, 30, 40], ["#6366f1", "#a855f7", "#ec4899"])],
+    // ---- Volume bar charts ----
+    const bars = [
+        { id: "palletReplenBarChart", data: [45, 60, 55, 70, 65], color: "#c084fc" },
+        { id: "caseReplenBarChart", data: [30, 40, 35, 50, 45], color: "#fb923c" },
+        { id: "palletStowBarChart", data: [50, 55, 60, 45, 65], color: "#60a5fa" },
     ];
+    bars.forEach((b) => {
+        const div = document.getElementById(b.id);
+        if (!div) return;
+        const canvas = injectCanvas(div, "display:block; width:100%; height:100%;");
+        new Chart(canvas, barConfig(b.data, b.color));
+    });
 
-    charts.forEach(([id, config]) => {
-        const canvas = document.getElementById(id);
-        if (canvas) new Chart(canvas, config);
+    // ---- Fast-start pie charts ----
+    const pies = [
+        { id: "replenQ1Pie", data: [40, 30, 30], colors: ["#3b82f6", "#8b5cf6", "#ec4899"] },
+        { id: "palletStowQ1Pie", data: [35, 45, 20], colors: ["#fb923c", "#ef4444", "#f59e0b"] },
+        { id: "replenQ2Pie", data: [50, 25, 25], colors: ["#10b981", "#3b82f6", "#6b7280"] },
+        { id: "palletStowQ2Pie", data: [30, 30, 40], colors: ["#6366f1", "#a855f7", "#ec4899"] },
+    ];
+    pies.forEach((p) => {
+        const div = document.getElementById(p.id);
+        if (!div) return;
+        div.style.width = "100px";
+        div.style.height = "100px";
+        const canvas = injectCanvas(div, "display:block; width:100%; height:100%;");
+        new Chart(canvas, pieConfig(p.data, p.colors));
     });
 }

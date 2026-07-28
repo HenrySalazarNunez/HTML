@@ -203,21 +203,3 @@ button:hover {
 .nav-link { color: #a855f7; text-decoration: none; font-weight: bold; font-size: 14px; }
 .nav-link:hover { text-decoration: underline; }
 .dashboard-footer { margin: 20px auto 40px auto; }
-/* --- LIVE CHART DASHBOARD LAYOUT ENHANCEMENTS --- */
-.dashboard-grid {
-    width: 100%;
-    max-width: 800px;
-    margin: 25px auto !important;
-    justify-content: center;
-}
-
-.chart-card {
-    background-color: #1a1a1e !important;   /* Matches your lockbox gray style */
-    border: 1px solid #2d2d34 !important;    /* Matches your lockbox border style */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Smooth drop shadow depth style */
-    transition: transform 0.2s ease;
-}
-
-.chart-card:hover {
-    transform: translateY(-2px);
-}

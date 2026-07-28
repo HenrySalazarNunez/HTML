@@ -16,7 +16,6 @@
             <p>Please enter your private key to access the workspace.</p>
             <input type="password" id="secretKey" placeholder="Enter passkey...">
             <button id="accessButton">Verify Identity</button>
-            <p style="font-size: 12px; color: #6b7280; margin-top: 15px;">Demo passkey: <code>1dc-operations</code></p>
         </div>
     </div>
 
@@ -24,31 +23,6 @@
     <div id="protectedContent" style="display: none;">
         <h1>Welcome to the Inner Circle</h1>
         <p>This structure is the Father, styled by the Son, given life by the Holy Spirit.</p>
-
-        <!-- Chart.js and the Excel (SheetJS) engine, vendored locally so the
-             charts work without any internet / CDN access. -->
-        <script src="vendor/chart.umd.min.js"></script>
-        <script src="vendor/xlsx.full.min.js"></script>
-
-        <!-- Dashboard Container Grid Area -->
-        <div class="dashboard-grid" style="display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
-            
-            <!-- Gauge Component Card (Doughnut styled as a speedometer half-circle) -->
-            <div class="chart-card" style="flex: 1; min-width: 280px; background: #111; padding: 20px; border-radius: 8px; border: 1px solid #333; text-align: center;">
-                <h3 style="color: #fff; margin-bottom: 15px; font-size: 16px;">📈 Operational Capacity (Gauge)</h3>
-                <div style="position: relative; max-width: 250px; margin: 0 auto;">
-                    <canvas id="gaugeChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Pie Component Card -->
-            <div class="chart-card" style="flex: 1; min-width: 280px; background: #111; padding: 20px; border-radius: 8px; border: 1px solid #333; text-align: center;">
-                <h3 style="color: #fff; margin-bottom: 15px; font-size: 16px;">📊 Inventory Distribution (Pie)</h3>
-                <div style="position: relative; max-width: 250px; margin: 0 auto;">
-                    <canvas id="pieChart"></canvas>
-                </div>
-            </div>
-        </div>        
         
         <!-- The System Entry Logs Terminal -->
         <div class="audit-card">
