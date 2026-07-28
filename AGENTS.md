@@ -37,8 +37,13 @@ None exist. There is nothing to lint, test, or build.
   `memberAccessStatus === 'granted'`.
 
 ### Non-obvious gotchas (verified during setup)
-- Chart.js and SheetJS (XLSX) are loaded from `cdn.jsdelivr.net`, so the app
-  needs outbound internet access for charts and Excel parsing to work.
+- Chart.js and SheetJS (XLSX) are **vendored locally** under `vendor/`
+  (`vendor/chart.umd.min.js`, `vendor/xlsx.full.min.js`) and loaded via relative
+  paths, so charts/Excel parsing work with **no internet/CDN** access. If charts
+  are ever missing, confirm these files are present and served (200), and that
+  `typeof Chart` / `typeof XLSX` are defined in the console.
 - The Excel fetch uses a **same-origin relative URL** (`Developer.xlsm`), so it
   only works when the files are served over HTTP (e.g. the
   `python3 -m http.server` dev server), not when opening the HTML via `file://`.
+- Chart canvases only appear after unlocking the portal (or on the dashboard
+  once access is granted); the locked gate has no charts by design.

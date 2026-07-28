@@ -25,9 +25,10 @@
         <h1>Welcome to the Inner Circle</h1>
         <p>This structure is the Father, styled by the Son, given life by the Holy Spirit.</p>
 
-        <!-- Load Chart.js and the Excel Engine Library from the Web CDN -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+        <!-- Chart.js and the Excel (SheetJS) engine, vendored locally so the
+             charts work without any internet / CDN access. -->
+        <script src="vendor/chart.umd.min.js"></script>
+        <script src="vendor/xlsx.full.min.js"></script>
 
         <!-- Dashboard Container Grid Area -->
         <div class="dashboard-grid" style="display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
