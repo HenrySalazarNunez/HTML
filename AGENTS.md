@@ -21,6 +21,12 @@ Serve the repo root with any static server, e.g. `python3 -m http.server 8000`,
 then open `http://localhost:8000/1-father.html`. Python 3 is preinstalled and
 there are no dependencies to install.
 
+### `standalone.html` — one-file version (opens with a double-click)
+`standalone.html` is the entire app in a single file (inline CSS/JS, Chart.js +
+SheetJS from CDN). It embeds a data **snapshot**, so double-clicking it (file://)
+shows the dashboard with no server. When hosted next to a `Developer.xlsm`, it
+reads the live workbook and 15-min syncs instead. Needs internet for the CDN libs.
+
 ### `dashboard/` — self-contained single-page build (recommended to deploy)
 `dashboard/` is a portable, drop-anywhere version of the whole app in one folder:
 `index.html` (login gate + dashboard in one page), `style.css`, `app.js`, its own
