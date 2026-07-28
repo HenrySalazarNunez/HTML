@@ -4,47 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Members-Only Portal</title>
-    <!-- Linking the Son for styling -->
+    <!-- The Son dresses the portal -->
     <link rel="stylesheet" href="2-son.css">
 </head>
 <body>
 
-    <!-- The Exclusive Gatekeeper Screen -->
+    <!-- The gatekeeper screen -->
     <div id="gatekeeper">
         <div class="lock-box">
-            <h2>🔒 Members Only Portal</h2>
-            <p>Please enter your private key to access the workspace.</p>
+            <h2>&#128274; Members Only Portal</h2>
+            <p>Enter your private identification key to access the operations workspace.</p>
             <input type="password" id="secretKey" placeholder="Enter passkey...">
             <button id="accessButton">Verify Identity</button>
+            <p class="hint">Demo keys: <code>Henry777</code>, <code>John123</code>, <code>Manager99</code></p>
         </div>
     </div>
 
-    <!-- The Main Protected Work Content (Hidden by Default!) -->
+    <!-- Protected content, revealed after a valid key -->
     <div id="protectedContent" style="display: none;">
         <h1>Welcome to the Inner Circle</h1>
-        <p>This structure is the Father, styled by the Son, given life by the Holy Spirit.</p>
-        
-        <!-- The System Entry Logs Terminal -->
+        <p>The Father (HTML) is styled by the Son (CSS) and given life by the Holy Spirit (JS),
+           which feeds the live dashboard from <strong>Developer.xlsm</strong>.</p>
+
         <div class="audit-card">
-            <h3>📋 System Entry Logs</h3>
-            <ul id="logList" style="list-style: none; padding: 0; max-height: 150px; overflow-y: auto;">
-                <!-- Logs inject here -->
-            </ul>
+            <h3>&#128203; System Entry Logs</h3>
+            <ul id="logList"><!-- audit entries inject here --></ul>
             <button id="downloadExcelBtn" style="margin-top: 15px; width: 100%; background-color: #059669;">
-                📥 Export Sheet (.csv)
+                &#128229; Export Database Sheet (.csv)
             </button>
         </div>
 
-        <br>
-        <a href="1.1-dashboard.html">Click here to jump to the Dashboard</a>
+        <a class="link-btn" href="1.1-dashboard.html">Open the Operations Dashboard &rarr;</a>
     </div>
 
-    <!-- Linking the Holy Spirit for the validation code -->
+    <!-- The Holy Spirit gives it life -->
     <script src="3-hollyspirit.js"></script>
 </body>
 </html>
-
-
-
-
-

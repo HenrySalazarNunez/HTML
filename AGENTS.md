@@ -7,52 +7,43 @@ package manager, build step, automated test suite, or linter. "Running" the app
 just means serving the files over HTTP.
 
 ### Files / structure
-- `1-father.html` — the "Members Only Portal" gatekeeper (login) page.
-- `1.1-dashboard.html` — the "Operations Mission Control" dashboard (protected page).
+- `1-father.html` — the "Members Only Portal" login gate + access log + CSV export.
+- `1.1-dashboard.html` — the "Operations Mission Control" dashboard (markup with
+  `<canvas>` elements + metric `<span>`s that the JS fills from Excel).
 - `2-son.css` — all styling (dark theme).
-- `3-hollyspirit.js` — the engine: login, access log, chart rendering, Excel.
-- `Developer.xlsm` — data workbook fetched by the JS.
-- `vendor/` — local copies of Chart.js and SheetJS (optional; see below).
-
-This repo mirrors the deployed GitHub Pages project. `3-hollyspirit.js` is written
-as a **drop-in**: the HTML pages only include `3-hollyspirit.js` (no chart/library
-`<script>` tags and no `<canvas>` elements in the markup). The engine loads the
-libraries itself and injects the `<canvas>` charts into the placeholder `<div>`s.
+- `3-hollyspirit.js` — the engine: login, chart rendering, and the Excel data feed.
+- `Developer.xlsm` — the data workbook. The `Database` sheet holds the hourly
+  operations data that drives the dashboard.
+- `vendor/` — local copies of Chart.js and SheetJS (loaded before the CDN).
 
 ### Running the app (dev)
-Serve the repo root with any static server, e.g.:
-`python3 -m http.server 8000`
-Then open `http://localhost:8000/1-father.html`.
-(Python 3 is preinstalled; no dependencies to install.)
+Serve the repo root with any static server, e.g. `python3 -m http.server 8000`,
+then open `http://localhost:8000/1-father.html`. Python 3 is preinstalled and
+there are no dependencies to install.
 
 ### Lint / test / build
 None exist. There is nothing to lint, test, or build.
 
-### How the pieces connect
-`3-hollyspirit.js` is the single engine that wires everything together:
-- **Login:** on `1-father.html` it validates the typed key against `USER_REGISTRY`
-  (multi-user keys, e.g. `Henry777`, `John123`, `Manager99`). A valid key sets
-  `localStorage.memberAccessStatus = 'granted'`, reveals the protected content,
-  and appends a timestamped "System Entry Logs" audit record (`accessLogs`).
-- **Libraries:** `ensureLibraries()` loads Chart.js + SheetJS, trying local
-  `vendor/` first and falling back to the jsDelivr CDN.
-- **Charts:** on the dashboard, `renderDashboardCharts()` injects `<canvas>`
-  elements into the existing placeholder `<div>`s (`.gauge-placeholder`,
-  `.bar-chart-viewport`, `.pie-chart-viewport`) and draws gauges/bars/pies.
-- **Excel:** `loadWorkbook()` fetches `Developer.xlsm` (SheetJS); the portal's
-  "Export Sheet (.csv)" button exports the `Database` sheet as CSV.
-- **Dashboard guard:** `1.1-dashboard.html` redirects to the portal unless
-  `memberAccessStatus === 'granted'`; a 15:00 countdown ticks in the header.
+### How it works
+- **Login:** `USER_REGISTRY` in `3-hollyspirit.js` maps keys to member names
+  (e.g. `Henry777`, `John123`, `Manager99`). A valid key sets
+  `localStorage.memberAccessStatus = 'granted'`, reveals the content, and adds a
+  timestamped audit entry to the "System Entry Logs".
+- **Excel feed:** the dashboard reads REAL values from the `Database` sheet of
+  `Developer.xlsm` (SheetJS), by absolute cell address (see the `COL` map in the
+  JS). It computes per-operation units/jobs/rates + hourly series and renders
+  gauges, bar charts, a distribution doughnut and an hourly line chart.
+- **15-minute sync:** the header countdown ticks down from 15:00; at 0 it
+  re-fetches `Developer.xlsm` (with `cache: no-store` + a cache-busting query
+  param) and re-renders. So editing the workbook at work updates the web.
+- **Libraries:** `ensureLibraries()` loads Chart.js + SheetJS from local
+  `vendor/` first, falling back to the jsDelivr CDN.
 
-### Non-obvious gotchas (verified during setup)
-- The HTML markup has **no chart libraries and no `<canvas>` elements** — both are
-  added at runtime by `3-hollyspirit.js`. If charts are missing, check the console
-  for library-load errors and confirm `typeof Chart` / `typeof XLSX` are defined.
-- Libraries load from local `vendor/` if present (works offline), otherwise from
-  the jsDelivr CDN. On a deployed site without `vendor/`, the CDN is used, so the
-  page needs internet there.
-- The Excel fetch uses a **same-origin relative URL** (`Developer.xlsm`), so it
-  only works when files are served over HTTP (e.g. `python3 -m http.server`), not
-  via `file://`.
-- Charts live only on the dashboard (once access is granted); the portal shows the
-  login gate, the audit log and the CSV export.
+### Non-obvious gotchas
+- The dashboard fetches `Developer.xlsm` via a same-origin relative URL, so it
+  must be served over HTTP (e.g. `python3 -m http.server`), not opened via
+  `file://`.
+- Charts are only on the dashboard, which redirects to the portal unless
+  `memberAccessStatus === 'granted'`.
+- The `Database` sheet layout is fixed (6 side-by-side hourly tables). If that
+  sheet's columns move, update the `COL` index map in `3-hollyspirit.js`.

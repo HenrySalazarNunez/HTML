@@ -1,27 +1,38 @@
-/* ==========================================
-   THE SON: MASTER ARCHITECTURE & STYLE SHEET
-   ========================================== */
+/* =========================================================================
+   THE SON — stylesheet for the Members Portal + Operations dashboard.
+   Rebuilt from scratch: clean dark operations theme.
+   ========================================================================= */
 
-/* --- CORE SYSTEM ROOT VARIABLES --- */
-body {
-    background-color: #0b111e; /* Deep operational dark background */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #e2e8f0;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+:root {
+    --bg: #0b111e;
+    --panel: #1f2937;
+    --panel-2: #111827;
+    --border: #374151;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --blue: #60a5fa;
+    --green: #4ade80;
 }
 
-/* --- SECURE GATEWAY PAGE STYLES --- */
+* { box-sizing: border-box; }
+
+body {
+    background-color: var(--bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text);
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* ----------------------------- Login gate ----------------------------- */
 #gatekeeper {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    width: 100vw;
+    padding: 20px;
 }
 
 .lock-box {
@@ -29,10 +40,13 @@ body {
     border: 1px solid #2d2d34;
     padding: 40px;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    max-width: 420px;
+    width: 100%;
     text-align: center;
 }
+
+.lock-box h2 { margin-top: 0; }
 
 input {
     background-color: #0f0f11;
@@ -40,18 +54,15 @@ input {
     color: white;
     padding: 12px;
     border-radius: 6px;
-    width: 80%;
-    margin-bottom: 20px;
+    width: 100%;
+    margin: 10px 0 16px 0;
     font-size: 16px;
     text-align: center;
     outline: none;
 }
 
-input:focus {
-    border-color: #a855f7;
-}
+input:focus { border-color: var(--purple); }
 
-/* --- SYSTEM BUTTONS & REACTION ACTIONS --- */
 button {
     background-color: #a855f7;
     color: white;
@@ -64,142 +75,114 @@ button {
     transition: 0.2s ease;
 }
 
-button:hover {
-    background-color: #9333ea;
-    transform: translateY(-1px);
+button:hover { background-color: #9333ea; transform: translateY(-1px); }
+
+.hint { font-size: 12px; color: #6b7280; margin-top: 14px; }
+.hint code { color: #a855f7; }
+
+/* --------------------------- Protected shell -------------------------- */
+#protectedContent { padding: 30px 40px; }
+#protectedContent h1 { margin-top: 0; }
+
+.audit-card {
+    background-color: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 560px;
+    margin-top: 20px;
 }
 
-/* --- EXECUTIVE DASHBOARD HEADER LAYER --- */
+.audit-card h3 { margin: 0 0 10px 0; color: #93c5fd; }
+#logList { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; }
+.log-item { padding: 6px 4px; border-bottom: 1px solid #222; font-family: monospace; font-size: 13px; color: #93c5fd; }
+
+.link-btn {
+    display: inline-block;
+    margin-top: 18px;
+    color: #a855f7;
+    font-weight: 700;
+    text-decoration: none;
+}
+.link-btn:hover { text-decoration: underline; }
+
+/* ----------------------------- Dashboard ------------------------------ */
 .dashboard-header {
-    width: 100%;
-    padding: 20px 40px;
-    background-color: #111827;
+    padding: 18px 30px;
+    background-color: var(--panel-2);
     border-bottom: 2px solid #1f2937;
-    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-.dashboard-header h1 {
-    margin: 0;
-    font-size: 24px;
-    color: white;
-    letter-spacing: -0.5px;
-}
+.dashboard-header h1 { margin: 0; font-size: 22px; color: #fff; letter-spacing: -0.5px; }
 
-/* --- MAIN 20-CARD OPERATIONS GRID ENGINE --- */
-.mission-control-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5 Columns */
-    gap: 15px; /* Spacing between cards */
-    width: 96vw;
-    margin: 25px auto;
-    box-sizing: border-box;
-}
-
-/* Individual Panel Container Cards */
-.dashboard-card {
-    background-color: #1f2937; /* Clean slate block fill */
-    border: 2px solid #374151; /* Grid frame border lines */
+.sync-badge {
+    font-size: 13px;
+    background: #111;
+    padding: 8px 14px;
     border-radius: 6px;
-    padding: 16px;
-    min-height: 220px;
+    border: 1px solid #333;
+}
+.sync-badge #countdownClock { color: var(--orange); font-weight: bold; font-family: monospace; }
+.sync-badge #lastSync { color: var(--muted); }
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 24px 30px;
+}
+
+.card {
+    background-color: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-height: 200px;
 }
 
-/* Double-sided metrics text alignment splitters */
-.card-header-split {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 1px solid #374151;
-    padding-bottom: 8px;
-    margin-bottom: 10px;
-}
-
-.dashboard-card h3 {
-    margin: 0;
+.card h3 {
+    margin: 0 0 6px 0;
     font-size: 13px;
-    color: #93c5fd; /* Operations Blue text */
+    color: #93c5fd;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-/* Gauge Sizing Text Values */
-.giant-metric {
-    font-size: 42px;
-    font-weight: bold;
-    display: block;
-    margin-top: 25px;
+.card-sub { font-size: 12px; color: var(--muted); margin: 0 0 12px 0; }
+
+.gauge-wrap { position: relative; width: 100%; max-width: 200px; height: 100px; margin: 0 auto; }
+.gauge-value {
+    position: absolute; bottom: 4px; left: 0; right: 0; text-align: center;
+    font-size: 30px; font-weight: 800;
 }
+.metric-purple { color: var(--purple); }
+.metric-orange { color: var(--orange); }
+.metric-blue { color: var(--blue); }
 
-.metric-purple { color: #c084fc; }
-.metric-orange { color: #fb923c; }
-.metric-blue { color: #60a5fa; }
+.stat-row { display: flex; justify-content: space-around; margin: 10px 0; text-align: center; }
+.stat-row .stat { flex: 1; }
+.stat .num { font-size: 20px; font-weight: 700; color: #fff; display: block; }
+.stat .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; }
 
-/* --- INTERNAL CHART DISPLAY PLACEHOLDERS --- */
-.bar-chart-viewport {
-    background-color: #111827;
-    border: 1px dashed #4b5563;
-    height: 100px;
-    border-radius: 4px;
-    margin-top: 10px;
-    background-image: linear-gradient(0deg, #1f2937 10%, transparent 10%);
-    background-size: 100% 20px; /* Mimics grid volume bar charts lines */
-}
+.chart-box { position: relative; width: 100%; height: 90px; margin-top: auto; }
 
-.pie-chart-viewport {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    background: conic-gradient(#a855f7 0% 35%, #3b82f6 35% 70%, #f97316 70% 100%);
-    margin: 15px auto 0 auto;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-}
+.total-list p { margin: 8px 0; font-family: monospace; font-size: 14px; }
+.total-list .big { font-size: 34px; font-weight: 800; color: #fff; margin: 4px 0 12px 0; }
+.text-purple { color: var(--purple); }
+.text-orange { color: var(--orange); }
+.text-blue { color: var(--blue); }
 
-/* --- THE CAPACITY THREE-ZONE GRID FRAMEWORK --- */
-.zone-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 12px;
-}
+.pie-box { position: relative; width: 100%; height: 170px; margin-top: 8px; }
 
-.zone-box {
-    background-color: #111827;
-    border: 1px solid #3b82f6;
-    border-radius: 4px;
-    padding: 8px;
-    text-align: center;
-}
+.status-ok { color: var(--green); font-size: 14px; margin-top: 12px; }
 
-.zone-box h5 {
-    margin: 0 0 4px 0;
-    font-size: 10px;
-    color: #94a3b8;
-}
+.dashboard-footer { padding: 10px 30px 40px; }
 
-.zone-box p {
-    margin: 0;
-    font-size: 18px;
-    font-weight: bold;
-    color: #3b82f6;
-}
-
-/* --- PANEL FILL GRADIENTS & TEXT ACCENTS --- */
-.gradient-purple { background: linear-gradient(135deg, #311542 0%, #1f2937 100%) !important; }
-.gradient-sunset { background: linear-gradient(135deg, #441414 0%, #b45309 100%) !important; }
-.gradient-clouds { background: linear-gradient(135deg, #1e293b 0%, #475569 100%) !important; }
-
-.total-badge { background-color: #1e3a8a; color: #60a5fa; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-.total-badge-gold { background-color: #d97706; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-
-.philosophy-quote { font-style: italic; color: #94a3b8; font-size: 12px; line-height: 1.5; margin: 15px 0 5px 0; }
-.quote-author { color: #a855f7; font-size: 10px; font-weight: 600; text-transform: uppercase; }
-
-.total-metrics-list p { margin: 6px 0; font-family: monospace; font-size: 13px; }
-.text-center { text-align: center; }
-.nav-link { color: #a855f7; text-decoration: none; font-weight: bold; font-size: 14px; }
-.nav-link:hover { text-decoration: underline; }
-.dashboard-footer { margin: 20px auto 40px auto; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }

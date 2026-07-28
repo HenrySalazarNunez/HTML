@@ -1,41 +1,52 @@
 // =====================================================================
-//  THE HOLY SPIRIT — the engine that gives life to the Father (HTML),
-//  wears the Son (CSS), guards the members area, and connects the whole
-//  operation to the Excel workbook (Developer.xlsm).
+//  THE HOLY SPIRIT — the engine (rebuilt from scratch).
 //
-//  This file is a drop-in replacement: it needs NO changes to the HTML
-//  or CSS. It loads the chart / Excel libraries on its own and injects
-//  real <canvas> charts into the existing placeholder <div>s.
+//  * Guards the members area (USER_REGISTRY login + audit log).
+//  * Loads Chart.js + SheetJS (local vendor/ first, CDN fallback).
+//  * Reads REAL values from Developer.xlsm ("Database" sheet) and feeds
+//    the Operations dashboard.
+//  * Re-syncs from the workbook every 15 minutes (matching the header
+//    countdown), so editing the Excel at work updates the web.
 // =====================================================================
 
 // ---- Configuration ---------------------------------------------------
 const EXCEL_URL = "Developer.xlsm";
 const STORAGE_KEY = "memberAccessStatus";
+const SYNC_SECONDS = 15 * 60; // 15 minutes
 
-// The identity roster: unique keys -> member name.
+// Identity roster: unique key -> member name.
 const USER_REGISTRY = {
     "IloveMyWork!": "System Creator (Henry)",
-    "I love my work": "System Creator (Henry)",
     "Henry777": "Henry Salazar",
     "John123": "John Doe",
     "Alpha777": "Team Alpha Leader",
     "Manager99": "Shift Operations Manager",
 };
 
-const isDashboardPage = window.location.href.includes("1.1-dashboard.html");
+// Absolute column indices in the "Database" sheet (A=0, B=1, C=2, ...).
+const COL = {
+    time: 1,          // B
+    palletUnits: 2,   // C
+    palletJobs: 3,    // D
+    palletRate: 8,    // I
+    caseUnits: 11,    // L
+    caseJobs: 12,     // M
+    caseRate: 18,     // S
+    stowRts: 21,      // V
+    stowCross: 22,    // W
+    stowRate: 27,     // AB
+};
 
-// ---- Boot ------------------------------------------------------------
+const isDashboardPage = window.location.href.includes("1.1-dashboard.html");
+const charts = {};
+
 document.addEventListener("DOMContentLoaded", () => {
-    if (isDashboardPage) {
-        initDashboardPage();
-    } else {
-        initPortalPage();
-    }
+    if (isDashboardPage) initDashboardPage();
+    else initPortalPage();
 });
 
 // =====================================================================
-//  LIBRARY LOADER — pulls Chart.js + SheetJS from a local vendor/ copy
-//  if present, otherwise from the jsDelivr CDN. Cached after first call.
+//  LIBRARY LOADER (vendor/ first, then jsDelivr CDN)
 // =====================================================================
 let libsPromise = null;
 function ensureLibraries() {
@@ -58,66 +69,17 @@ function loadFirstAvailable(urls) {
         let i = 0;
         (function next() {
             if (i >= urls.length) return reject(new Error("Could not load: " + urls.join(", ")));
-            const script = document.createElement("script");
-            script.src = urls[i++];
-            script.onload = () => resolve(script.src);
-            script.onerror = () => {
-                script.remove();
-                next();
-            };
-            document.head.appendChild(script);
+            const s = document.createElement("script");
+            s.src = urls[i++];
+            s.onload = () => resolve(s.src);
+            s.onerror = () => { s.remove(); next(); };
+            document.head.appendChild(s);
         })();
     });
 }
 
 // =====================================================================
-//  THE EXCEL WORKBOOK
-// =====================================================================
-let workbookPromise = null;
-function loadWorkbook() {
-    if (workbookPromise) return workbookPromise;
-    if (typeof XLSX === "undefined") return Promise.resolve(null);
-
-    workbookPromise = fetch(EXCEL_URL)
-        .then((r) => {
-            if (!r.ok) throw new Error("HTTP " + r.status);
-            return r.arrayBuffer();
-        })
-        .then((buf) => {
-            const wb = XLSX.read(new Uint8Array(buf), { type: "array" });
-            console.log("Excel connected — sheets:", wb.SheetNames);
-            return wb;
-        })
-        .catch((err) => {
-            console.error("Excel fetch failed:", err);
-            return null;
-        });
-    return workbookPromise;
-}
-
-function wireCsvExport() {
-    const button = document.getElementById("downloadExcelBtn");
-    if (!button) return;
-    button.addEventListener("click", () => {
-        loadWorkbook().then((wb) => {
-            if (!wb) return alert("Workbook not loaded yet — please try again in a moment.");
-            const sheetName = wb.SheetNames.find((n) => n.trim() === "Database") || wb.SheetNames[0];
-            const csv = XLSX.utils.sheet_to_csv(wb.Sheets[sheetName]);
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = sheetName.trim() + ".csv";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(url);
-        });
-    });
-}
-
-// =====================================================================
-//  THE PORTAL  (login + access audit log + Excel export)
+//  THE PORTAL (login + audit log + CSV export)
 // =====================================================================
 function initPortalPage() {
     const gatekeeper = document.getElementById("gatekeeper");
@@ -133,10 +95,10 @@ function initPortalPage() {
 
     const verify = () => {
         const typed = (secretKeyInput.value || "").trim();
-        const employeeName = USER_REGISTRY[typed];
-        if (employeeName) {
+        const name = USER_REGISTRY[typed];
+        if (name) {
             localStorage.setItem(STORAGE_KEY, "granted");
-            recordEntry(employeeName);
+            recordEntry(name);
             secretKeyInput.value = "";
             reveal();
         } else {
@@ -146,56 +108,109 @@ function initPortalPage() {
     };
 
     if (accessButton) accessButton.addEventListener("click", verify);
-    if (secretKeyInput) {
-        secretKeyInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") verify();
-        });
-    }
+    if (secretKeyInput) secretKeyInput.addEventListener("keydown", (e) => { if (e.key === "Enter") verify(); });
 
-    // Connect the workbook so the CSV export button works once revealed.
-    ensureLibraries().then(() => {
-        loadWorkbook();
-        wireCsvExport();
-    });
+    ensureLibraries().then(() => { loadWorkbook(); wireCsvExport(); });
 
-    // Returning members who already hold the token skip the gate.
-    if (localStorage.getItem(STORAGE_KEY) === "granted") {
-        reveal();
-    } else {
-        renderLogs();
-    }
+    if (localStorage.getItem(STORAGE_KEY) === "granted") reveal();
+    else renderLogs();
 }
 
-function recordEntry(employeeName) {
-    const stamp = new Date().toLocaleString();
+function recordEntry(name) {
     const logs = JSON.parse(localStorage.getItem("accessLogs")) || [];
-    logs.unshift("Entry: " + employeeName + " signed in at " + stamp);
+    logs.unshift("Entry: " + name + " signed in at " + new Date().toLocaleString());
     localStorage.setItem("accessLogs", JSON.stringify(logs));
 }
 
 function renderLogs() {
-    const logList = document.getElementById("logList");
-    if (!logList) return;
+    const list = document.getElementById("logList");
+    if (!list) return;
     const logs = JSON.parse(localStorage.getItem("accessLogs")) || [];
-    logList.innerHTML = "";
-    if (logs.length === 0) {
-        appendLog(logList, "No entries yet — sign in to create the first audit record.");
-        return;
-    }
-    logs.forEach((text) => appendLog(logList, "\u2705 " + text));
+    list.innerHTML = "";
+    if (!logs.length) return appendLog(list, "No entries yet — sign in to create the first audit record.");
+    logs.forEach((t) => appendLog(list, "\u2705 " + t));
 }
 
-function appendLog(logList, text) {
+function appendLog(list, text) {
     const li = document.createElement("li");
     li.className = "log-item";
     li.textContent = text;
-    li.style.cssText =
-        "padding:6px 4px; border-bottom:1px solid #222; font-family:monospace; font-size:13px; color:#93c5fd;";
-    logList.appendChild(li);
+    list.appendChild(li);
+}
+
+function wireCsvExport() {
+    const btn = document.getElementById("downloadExcelBtn");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+        loadWorkbook().then((wb) => {
+            if (!wb) return alert("Workbook not loaded yet — try again in a moment.");
+            const name = wb.SheetNames.find((n) => n.trim() === "Database") || wb.SheetNames[0];
+            const csv = XLSX.utils.sheet_to_csv(wb.Sheets[name]);
+            const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+            const a = document.createElement("a");
+            a.href = url; a.download = name.trim() + ".csv";
+            document.body.appendChild(a); a.click(); a.remove();
+            URL.revokeObjectURL(url);
+        });
+    });
 }
 
 // =====================================================================
-//  THE DASHBOARD  (guarded; injects real charts + live countdown)
+//  THE EXCEL WORKBOOK  (fresh copy on every call for the 15-min sync)
+// =====================================================================
+function loadWorkbook() {
+    if (typeof XLSX === "undefined") return Promise.resolve(null);
+    return fetch(EXCEL_URL + "?t=" + Date.now(), { cache: "no-store" })
+        .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.arrayBuffer(); })
+        .then((buf) => XLSX.read(new Uint8Array(buf), { type: "array" }))
+        .catch((err) => { console.error("Excel fetch failed:", err); return null; });
+}
+
+// Read every data row of the Database sheet by absolute cell address.
+function parseDatabase(wb) {
+    const name = wb.SheetNames.find((n) => n.trim() === "Database");
+    if (!name) return null;
+    const ws = wb.Sheets[name];
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+    const num = (r, c) => {
+        const cell = ws[XLSX.utils.encode_cell({ r: r, c: c })];
+        return cell && typeof cell.v === "number" ? cell.v : null;
+    };
+
+    const rows = [];
+    for (let r = range.s.r; r <= range.e.r; r++) {
+        const t = num(r, COL.time);
+        const u = num(r, COL.palletUnits);
+        if (t === null || u === null) continue; // keep only hourly data rows
+        rows.push(r);
+    }
+
+    const sum = (c) => rows.reduce((a, r) => a + (num(r, c) || 0), 0);
+    const avg = (c) => {
+        const v = rows.map((r) => num(r, c)).filter((x) => x !== null);
+        return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0;
+    };
+    const series = (c, n) => rows.slice(0, n).map((r) => num(r, c) || 0);
+    const labels = rows.slice(0, 8).map((r) => fracToHour(num(r, COL.time)));
+
+    return {
+        labels: labels,
+        palletReplen: { units: sum(COL.palletUnits), jobs: sum(COL.palletJobs), rate: avg(COL.palletRate), hourly: series(COL.palletUnits, 8) },
+        caseReplen: { units: sum(COL.caseUnits), jobs: sum(COL.caseJobs), rate: avg(COL.caseRate), hourly: series(COL.caseUnits, 8) },
+        palletStow: { rts: sum(COL.stowRts), cross: sum(COL.stowCross), rate: avg(COL.stowRate), hourly: series(COL.stowRts, 8) },
+        rowCount: rows.length,
+    };
+}
+
+function fracToHour(frac) {
+    let h = Math.round(frac * 24);
+    const ampm = h >= 12 && h < 24 ? "PM" : "AM";
+    let hr = h % 12; if (hr === 0) hr = 12;
+    return hr + ampm;
+}
+
+// =====================================================================
+//  THE DASHBOARD
 // =====================================================================
 function initDashboardPage() {
     if (localStorage.getItem(STORAGE_KEY) !== "granted") {
@@ -204,127 +219,125 @@ function initDashboardPage() {
         return;
     }
 
-    startCountdown();
-
     ensureLibraries()
         .then(() => {
-            renderDashboardCharts();
-            loadWorkbook();
+            syncNow();          // first paint
+            startSyncCountdown(); // tick + re-sync every 15 min
         })
-        .catch((err) => console.error("Chart libraries failed to load:", err));
+        .catch((err) => console.error("Libraries failed to load:", err));
 }
 
-function startCountdown() {
+function syncNow() {
+    return loadWorkbook().then((wb) => {
+        if (!wb) return setLastSync("Sync failed — workbook unavailable");
+        const m = parseDatabase(wb);
+        if (!m) return setLastSync("Sync failed — 'Database' sheet not found");
+        renderDashboard(m);
+        setLastSync("Last synced " + new Date().toLocaleTimeString());
+        console.log("Dashboard synced from Excel:", m);
+    });
+}
+
+function setLastSync(text) {
+    const el = document.getElementById("lastSync");
+    if (el) el.textContent = text;
+}
+
+function startSyncCountdown() {
+    let remaining = SYNC_SECONDS;
     const el = document.getElementById("countdownClock");
-    if (!el) return;
-    let total = 15 * 60;
     setInterval(() => {
-        total = total <= 0 ? 15 * 60 : total - 1;
-        const m = String(Math.floor(total / 60)).padStart(2, "0");
-        const s = String(total % 60).padStart(2, "0");
-        el.textContent = m + ":" + s;
+        remaining -= 1;
+        if (remaining <= 0) { remaining = SYNC_SECONDS; syncNow(); }
+        if (el) {
+            const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+            const ss = String(remaining % 60).padStart(2, "0");
+            el.textContent = mm + ":" + ss;
+        }
     }, 1000);
 }
 
-// ---- Chart config factories -----------------------------------------
-function gaugeConfig(percent, color) {
-    return {
+// ---- rendering -------------------------------------------------------
+function renderDashboard(m) {
+    const fmt = (n) => Math.round(n).toLocaleString();
+
+    text("palletReplenRate", m.palletReplen.rate.toFixed(1));
+    text("palletReplenUnits", fmt(m.palletReplen.units));
+    text("palletReplenJobs", fmt(m.palletReplen.jobs));
+
+    text("caseReplenRate", m.caseReplen.rate.toFixed(0));
+    text("caseReplenUnits", fmt(m.caseReplen.units));
+    text("caseReplenJobs", fmt(m.caseReplen.jobs));
+
+    text("palletStowRate", m.palletStow.rate.toFixed(1));
+    text("palletStowRts", fmt(m.palletStow.rts));
+    text("palletStowCross", fmt(m.palletStow.cross));
+
+    const stowVolume = m.palletStow.rts + m.palletStow.cross;
+    const total = m.palletReplen.units + m.caseReplen.units + stowVolume;
+    text("totalUnits", fmt(total));
+    text("totalPalletR", fmt(m.palletReplen.units));
+    text("totalCaseR", fmt(m.caseReplen.units));
+    text("totalPalletS", fmt(stowVolume));
+    text("systemStatus", "\uD83D\uDFE2 Live — " + m.rowCount + " hourly records loaded from Developer.xlsm");
+
+    // Gauges (fill = rate vs a sensible target, capped at 100%).
+    gauge("gaugePalletReplen", m.palletReplen.rate, 10, "#c084fc");
+    gauge("gaugeCaseReplen", m.caseReplen.rate, 130, "#fb923c");
+    gauge("gaugePalletStow", m.palletStow.rate, 10, "#60a5fa");
+
+    // Hourly volume bar charts.
+    bar("barPalletReplen", m.labels, m.palletReplen.hourly, "#c084fc");
+    bar("barCaseReplen", m.labels, m.caseReplen.hourly, "#fb923c");
+    bar("barPalletStow", m.labels, m.palletStow.hourly, "#60a5fa");
+
+    // Volume distribution pie.
+    upsert("pieDistribution", {
         type: "doughnut",
         data: {
-            labels: ["Completed", "Remaining"],
-            datasets: [{ data: [percent, 100 - percent], backgroundColor: [color, "#222"], borderWidth: 0 }],
+            labels: ["Pallet Replen", "Case Replen", "Pallet Stow"],
+            datasets: [{ data: [m.palletReplen.units, m.caseReplen.units, stowVolume],
+                backgroundColor: ["#c084fc", "#fb923c", "#60a5fa"], borderWidth: 0 }],
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            circumference: 180,
-            rotation: -90,
-            cutout: "75%",
-            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        },
-    };
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: "#e2e8f0", font: { size: 11 } } } } },
+    });
+
+    // Hourly throughput line (Pallet + Case units per hour).
+    const throughput = m.labels.map((_, i) => (m.palletReplen.hourly[i] || 0) + (m.caseReplen.hourly[i] || 0));
+    upsert("lineHourly", {
+        type: "line",
+        data: { labels: m.labels, datasets: [{ data: throughput, borderColor: "#4ade80", backgroundColor: "rgba(74,222,128,0.15)", fill: true, tension: 0.35, pointRadius: 2 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { x: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { display: false } },
+                      y: { ticks: { color: "#94a3b8", font: { size: 10 } }, grid: { color: "#1f2937" } } } },
+    });
 }
 
-function barConfig(values, color) {
-    return {
+function text(id, value) { const el = document.getElementById(id); if (el) el.textContent = value; }
+
+function gauge(id, value, target, color) {
+    const pct = Math.max(0, Math.min(100, (value / target) * 100));
+    upsert(id, {
+        type: "doughnut",
+        data: { labels: ["", ""], datasets: [{ data: [pct, 100 - pct], backgroundColor: [color, "#222"], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, circumference: 180, rotation: -90, cutout: "72%",
+            plugins: { legend: { display: false }, tooltip: { enabled: false } } },
+    });
+}
+
+function bar(id, labels, data, color) {
+    upsert(id, {
         type: "bar",
-        data: { labels: ["M", "T", "W", "T", "F"], datasets: [{ data: values, backgroundColor: color }] },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: { y: { display: false }, x: { display: false } },
-            plugins: { legend: { display: false } },
-        },
-    };
+        data: { labels: labels, datasets: [{ data: data, backgroundColor: color }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { x: { ticks: { color: "#94a3b8", font: { size: 9 } }, grid: { display: false } },
+                      y: { display: false } } },
+    });
 }
 
-function pieConfig(values, colors) {
-    return {
-        type: "pie",
-        data: { labels: ["A", "B", "C"], datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } },
-    };
-}
-
-// Inject a <canvas> into a container (clearing any placeholder background).
-function injectCanvas(container, styleText) {
-    container.style.backgroundImage = "none";
-    container.style.background = "none";
-    container.style.boxShadow = "none";
-    container.style.border = "none";
-    const canvas = document.createElement("canvas");
-    canvas.style.cssText = styleText || "display:block; width:100%; height:100%;";
-    container.appendChild(canvas);
-    return canvas;
-}
-
-function renderDashboardCharts() {
-    // ---- Gauges (injected above the giant metric numbers) ----
-    const gauges = [
-        { metricId: "palletReplenRate", percent: 75, color: "#c084fc" },
-        { metricId: "caseReplenRate", percent: 60, color: "#fb923c" },
-        { metricId: "palletStowRate", percent: 80, color: "#60a5fa" },
-    ];
-    gauges.forEach((g) => {
-        const metric = document.getElementById(g.metricId);
-        if (!metric) return;
-        const holder = metric.closest(".gauge-placeholder") || metric.parentElement;
-        const wrap = document.createElement("div");
-        wrap.style.cssText = "position:relative; width:100%; max-width:150px; height:78px; margin:0 auto;";
-        // Insert into the DOM BEFORE creating the chart so Chart.js can size it.
-        holder.insertBefore(wrap, holder.firstChild);
-        const canvas = document.createElement("canvas");
-        canvas.style.cssText = "display:block; width:100%; height:100%;";
-        wrap.appendChild(canvas);
-        new Chart(canvas, gaugeConfig(g.percent, g.color));
-    });
-
-    // ---- Volume bar charts ----
-    const bars = [
-        { id: "palletReplenBarChart", data: [45, 60, 55, 70, 65], color: "#c084fc" },
-        { id: "caseReplenBarChart", data: [30, 40, 35, 50, 45], color: "#fb923c" },
-        { id: "palletStowBarChart", data: [50, 55, 60, 45, 65], color: "#60a5fa" },
-    ];
-    bars.forEach((b) => {
-        const div = document.getElementById(b.id);
-        if (!div) return;
-        const canvas = injectCanvas(div, "display:block; width:100%; height:100%;");
-        new Chart(canvas, barConfig(b.data, b.color));
-    });
-
-    // ---- Fast-start pie charts ----
-    const pies = [
-        { id: "replenQ1Pie", data: [40, 30, 30], colors: ["#3b82f6", "#8b5cf6", "#ec4899"] },
-        { id: "palletStowQ1Pie", data: [35, 45, 20], colors: ["#fb923c", "#ef4444", "#f59e0b"] },
-        { id: "replenQ2Pie", data: [50, 25, 25], colors: ["#10b981", "#3b82f6", "#6b7280"] },
-        { id: "palletStowQ2Pie", data: [30, 30, 40], colors: ["#6366f1", "#a855f7", "#ec4899"] },
-    ];
-    pies.forEach((p) => {
-        const div = document.getElementById(p.id);
-        if (!div) return;
-        div.style.width = "100px";
-        div.style.height = "100px";
-        const canvas = injectCanvas(div, "display:block; width:100%; height:100%;");
-        new Chart(canvas, pieConfig(p.data, p.colors));
-    });
+function upsert(id, config) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(el, config);
 }

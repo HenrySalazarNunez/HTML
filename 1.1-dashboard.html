@@ -4,217 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Operations Mission Control Dashboard</title>
-    <!-- The Son dresses the dashboard automatically -->
     <link rel="stylesheet" href="2-son.css">
 </head>
 <body>
 
-    <!-- Header bar featuring your Classy Live Sync Countdown Tracker -->
     <div class="dashboard-header">
-        <h1>📊 Operations Mission Control</h1>
-        <div class="countdown-badge">
-            🔄 Next Live Excel Sync: <span id="countdownClock">15:00</span>
+        <h1>&#128202; Operations Mission Control</h1>
+        <div class="sync-badge">
+            &#128260; Next Excel Sync: <span id="countdownClock">15:00</span>
+            &nbsp;|&nbsp; <span id="lastSync">Loading workbook&hellip;</span>
         </div>
     </div>
 
-    <!-- Main Grid Layout Architecture (4 Rows x 5 Columns = 20 Cards) -->
-    <div class="mission-control-grid">
-        
-        <!-- ================= ROW 1: PALLET REPLEN OPERATIONS ================= -->
-        <!-- CARD 1: Pallet Replen Rate Gauge -->
-        <div class="dashboard-card text-center">
+    <div class="grid">
+
+        <!-- ---------- Pallet Replen ---------- -->
+        <div class="card">
             <h3>Pallet Replen</h3>
-            <div class="gauge-placeholder">
-                <span class="giant-metric metric-purple" id="palletReplenRate">8.0</span>
-                <p>Rate</p>
+            <p class="card-sub">Rate (units/hr avg)</p>
+            <div class="gauge-wrap">
+                <canvas id="gaugePalletReplen"></canvas>
+                <div class="gauge-value metric-purple" id="palletReplenRate">--</div>
             </div>
-        </div>
-
-        <!-- CARD 2: Pallet Replen Volume Tracker -->
-        <div class="dashboard-card">
-            <div class="card-header-split">
-                <h3>Pallet Replen Vol</h3>
-                <div class="right-metrics">
-                    <p>Units: <strong id="palletReplenUnits">12,432</strong></p>
-                    <p>Jobs: <strong id="palletReplenJobs">44</strong></p>
-                </div>
+            <div class="stat-row">
+                <div class="stat"><span class="num" id="palletReplenUnits">--</span><span class="lbl">Units</span></div>
+                <div class="stat"><span class="num" id="palletReplenJobs">--</span><span class="lbl">Jobs</span></div>
             </div>
-            <div class="bar-chart-viewport" id="palletReplenBarChart"></div>
+            <div class="chart-box"><canvas id="barPalletReplen"></canvas></div>
         </div>
 
-        <!-- CARD 3: Eye of Horus Art Frame -->
-        <div class="dashboard-card art-card eye-of-horus">
-            <h3>Pallet Replen Rate</h3>
-        </div>
-
-        <!-- CARD 4: Mona Lisa Art Frame -->
-        <div class="dashboard-card art-card mona-lisa">
-            <div class="card-header-split">
-                <h3>Pallet Replen WIP</h3>
-                <p>Hours: <strong>PNE4</strong></p>
-            </div>
-        </div>
-
-        <!-- CARD 5: Three Faces Process Forecasting Panel -->
-        <div class="dashboard-card panel-purple">
-            <h3>Three Faces Process</h3>
-            <p class="panel-desc">Forecasting shift requirements based on volume patterns.</p>
-        </div>
-
-
-        <!-- ================= ROW 2: CASE REPLEN OPERATIONS ================= -->
-        <!-- CARD 6: Case Replen Rate Gauge -->
-        <div class="dashboard-card text-center">
+        <!-- ---------- Case Replen ---------- -->
+        <div class="card">
             <h3>Case Replen</h3>
-            <div class="gauge-placeholder">
-                <span class="giant-metric metric-orange" id="caseReplenRate">101</span>
-                <p>Rate</p>
+            <p class="card-sub">Rate (units/hr avg)</p>
+            <div class="gauge-wrap">
+                <canvas id="gaugeCaseReplen"></canvas>
+                <div class="gauge-value metric-orange" id="caseReplenRate">--</div>
             </div>
+            <div class="stat-row">
+                <div class="stat"><span class="num" id="caseReplenUnits">--</span><span class="lbl">Units</span></div>
+                <div class="stat"><span class="num" id="caseReplenJobs">--</span><span class="lbl">Jobs</span></div>
+            </div>
+            <div class="chart-box"><canvas id="barCaseReplen"></canvas></div>
         </div>
 
-        <!-- CARD 7: Case Replen Volume Tracker -->
-        <div class="dashboard-card">
-            <div class="card-header-split">
-                <h3>Case Replen Vol</h3>
-                <div class="right-metrics">
-                    <p>Units: <strong id="caseReplenUnits">80,980</strong></p>
-                    <p>Jobs: <strong id="caseReplenJobs">146</strong></p>
-                </div>
-            </div>
-            <div class="bar-chart-viewport" id="caseReplenBarChart"></div>
-        </div>
-
-        <!-- CARD 8: Patriotic Flag Art Frame -->
-        <div class="dashboard-card art-card american-flag">
-            <h3>Case Replen Rate</h3>
-        </div>
-
-        <!-- CARD 9: School of Athens Philosophy Frame -->
-        <div class="dashboard-card art-card school-of-athens">
-            <div class="card-header-split">
-                <h3>Case Replen WIP</h3>
-                <p>Hours: <strong>PNE4</strong></p>
-            </div>
-        </div>
-
-        <!-- CARD 10: Pallet Stow Empty Space Matrix -->
-        <div class="dashboard-card capacity-card">
-            <div class="card-header-split">
-                <h3>Pallet Stow Empty Space</h3>
-                <span class="total-badge">Total: 207</span>
-            </div>
-            <div class="zone-grid">
-                <div class="zone-box"><h5>Zone 3</h5><p id="zone3Val">60</p></div>
-                <div class="zone-box"><h5>Zone 2</h5><p id="zone2Val">92</p></div>
-                <div class="zone-box"><h5>Zone 1</h5><p id="zone1Val">55</p></div>
-            </div>
-        </div>
-
-
-        <!-- ================= ROW 3: PALLET STOW OPERATIONS ================= -->
-        <!-- CARD 11: Pallet Stow Rate Gauge -->
-        <div class="dashboard-card text-center">
+        <!-- ---------- Pallet Stow ---------- -->
+        <div class="card">
             <h3>Pallet Stow</h3>
-            <div class="gauge-placeholder">
-                <span class="giant-metric metric-blue" id="palletStowRate">7.2</span>
-                <p>Rate</p>
+            <p class="card-sub">Rate (units/hr avg)</p>
+            <div class="gauge-wrap">
+                <canvas id="gaugePalletStow"></canvas>
+                <div class="gauge-value metric-blue" id="palletStowRate">--</div>
             </div>
+            <div class="stat-row">
+                <div class="stat"><span class="num" id="palletStowRts">--</span><span class="lbl">RTS</span></div>
+                <div class="stat"><span class="num" id="palletStowCross">--</span><span class="lbl">Cross</span></div>
+            </div>
+            <div class="chart-box"><canvas id="barPalletStow"></canvas></div>
         </div>
 
-        <!-- CARD 12: Pallet Stow Volume Tracker -->
-        <div class="dashboard-card">
-            <div class="card-header-split">
-                <h3>Pallet Stow Vol</h3>
-                <div class="right-metrics">
-                    <p>RTS: <strong id="palletStowRts">12</strong></p>
-                    <p>Cross: <strong id="palletStowCross">80</strong></p>
-                </div>
+        <!-- ---------- Total Units Monitor ---------- -->
+        <div class="card">
+            <h3>Total Units Monitor</h3>
+            <p class="card-sub">Aggregate volume from the workbook</p>
+            <div class="total-list">
+                <span class="big" id="totalUnits">--</span>
+                <p>&#128230; Pallet Replen: <strong class="text-purple" id="totalPalletR">--</strong></p>
+                <p>&#128230; Case Replen: <strong class="text-orange" id="totalCaseR">--</strong></p>
+                <p>&#128230; Pallet Stow: <strong class="text-blue" id="totalPalletS">--</strong></p>
             </div>
-            <div class="bar-chart-viewport" id="palletStowBarChart"></div>
+            <p class="status-ok" id="systemStatus">&#128994; Awaiting first sync&hellip;</p>
         </div>
 
-        <!-- CARD 13: Lady Justice Art Frame -->
-        <div class="dashboard-card art-card lady-justice">
-            <h3>Pallet Stow Rate</h3>
+        <!-- ---------- Volume Distribution ---------- -->
+        <div class="card">
+            <h3>Volume Distribution</h3>
+            <p class="card-sub">Share of total operation volume</p>
+            <div class="pie-box"><canvas id="pieDistribution"></canvas></div>
         </div>
 
-        <!-- CARD 14: Marcus Aurelius Imperial Quote Board -->
-        <div class="dashboard-card art-card marcus-aurelius">
-            <div class="card-header-split">
-                <h3>Pallet Stow WIP</h3>
-                <p>Hours: <strong>PNE4</strong></p>
-            </div>
-            <div class="quote-text-layout">
-                <p class="philosophy-quote">"Accept the things to which fate binds you, and love the people with whom fate brings you together, but do so with all your heart."</p>
-                <span class="quote-author">— Marcus Aurelius</span>
-            </div>
-        </div>
-
-        <!-- CARD 15: General Operations System Ledger -->
-        <div class="dashboard-card placeholder-card">
-            <h3>System Status</h3>
-            <p class="status-alert">🟢 All operational metrics running within optimal thresholds.</p>
-        </div>
-
-
-        <!-- ================= ROW 4: FAST START PIE OPERATIONS ================= -->
-        <!-- CARD 16: Fast Start Replen Q1 -->
-        <div class="dashboard-card text-center gradient-purple">
-            <div class="card-header-split">
-                <h3>Fast Start Replen Q1</h3>
-                <span class="total-badge text-white">29.5</span>
-            </div>
-            <div class="pie-chart-viewport" id="replenQ1Pie"></div>
-        </div>
-
-        <!-- CARD 17: Fast Start Pallet Stow Q1 -->
-        <div class="dashboard-card text-center gradient-sunset">
-            <div class="card-header-split">
-                <h3>Fast Start Pallet Stow Q1</h3>
-                <span class="total-badge text-white">28.2</span>
-            </div>
-            <div class="pie-chart-viewport" id="palletStowQ1Pie"></div>
-        </div>
-
-        <!-- CARD 18: Fast Start Replen Q2 -->
-        <div class="dashboard-card text-center">
-            <div class="card-header-split">
-                <h3>Fast Start Replen Q2</h3>
-                <span class="total-badge text-white">1336</span>
-            </div>
-            <div class="pie-chart-viewport" id="replenQ2Pie"></div>
-        </div>
-
-        <!-- CARD 19: Fast Start Pallet Stow Q2 -->
-        <div class="dashboard-card text-center gradient-clouds">
-            <div class="card-header-split">
-                <h3>Fast Start Pallet Stow Q2</h3>
-                <span class="total-badge text-white">1336</span>
-            </div>
-            <div class="pie-chart-viewport" id="palletStowQ2Pie"></div>
-        </div>
-
-        <!-- CARD 20: Master Aggregate Summary Tracker -->
-        <div class="dashboard-card summary-card-blue">
-            <div class="card-header-split">
-                <h3>Total Units Monitor</h3>
-                <span class="total-badge-gold">111,614</span>
-            </div>
-            <div class="total-metrics-list">
-                <p>📦 Pallet R: <strong class="text-orange">37,698</strong></p>
-                <p>📦 Case R: <strong class="text-blue">73,040</strong></p>
-                <p>📦 Pallet S: <strong class="text-yellow">876</strong></p>
-            </div>
+        <!-- ---------- Hourly Throughput ---------- -->
+        <div class="card">
+            <h3>Hourly Throughput</h3>
+            <p class="card-sub">Units per hour (all operations)</p>
+            <div class="pie-box"><canvas id="lineHourly"></canvas></div>
         </div>
 
     </div>
 
-    <!-- Navigation footer to slide back through the secure gateway -->
     <div class="dashboard-footer">
-        <a href="1-father.html" class="nav-link">← Return to Private Members Portal</a>
+        <a class="link-btn" href="1-father.html">&larr; Return to Members Portal</a>
     </div>
 
-    <!-- The Holy Spirit controls the automated intervals and timers -->
+    <!-- The Holy Spirit feeds this dashboard from the Excel workbook -->
     <script src="3-hollyspirit.js"></script>
 </body>
 </html>
