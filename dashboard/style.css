@@ -1,0 +1,152 @@
+/* =========================================================================
+   Operations Mission Control — self-contained dashboard styles.
+   ========================================================================= */
+:root {
+    --bg: #0b111e;
+    --panel: #1f2937;
+    --panel-2: #111827;
+    --border: #374151;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --blue: #60a5fa;
+    --green: #4ade80;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    background-color: var(--bg);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text);
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* ---- Login gate ---- */
+#gate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.lock-box {
+    background-color: #1a1a1e;
+    border: 1px solid #2d2d34;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+}
+
+.lock-box h2 { margin-top: 0; }
+
+input {
+    background-color: #0f0f11;
+    border: 1px solid #3f3f46;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    width: 100%;
+    margin: 10px 0 16px 0;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+}
+input:focus { border-color: var(--purple); }
+
+button {
+    background-color: #a855f7;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+button:hover { background-color: #9333ea; transform: translateY(-1px); }
+
+.hint { font-size: 12px; color: #6b7280; margin-top: 14px; }
+.hint code { color: #a855f7; }
+.err { color: #f87171; font-size: 14px; margin: 10px 0 0 0; min-height: 18px; }
+
+/* ---- Dashboard header ---- */
+.dashboard-header {
+    padding: 16px 26px;
+    background-color: var(--panel-2);
+    border-bottom: 2px solid #1f2937;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.dashboard-header h1 { margin: 0; font-size: 21px; color: #fff; letter-spacing: -0.5px; }
+.header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.sync-badge {
+    font-size: 13px;
+    background: #111;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+.sync-badge #countdownClock { color: var(--orange); font-weight: bold; font-family: monospace; }
+.sync-badge #lastSync { color: var(--muted); }
+
+.mini-btn { padding: 8px 12px; font-size: 13px; background: #059669; }
+.mini-btn:hover { background: #047857; }
+.mini-btn.ghost { background: #374151; }
+.mini-btn.ghost:hover { background: #4b5563; }
+
+/* ---- Grid + cards ---- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 24px 26px;
+}
+
+.card {
+    background-color: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    min-height: 210px;
+}
+.card h3 { margin: 0 0 4px 0; font-size: 13px; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.5px; }
+.card-sub { font-size: 12px; color: var(--muted); margin: 0 0 12px 0; }
+
+.gauge-wrap { position: relative; width: 100%; max-width: 210px; height: 100px; margin: 0 auto; }
+.gauge-value { position: absolute; bottom: 2px; left: 0; right: 0; text-align: center; font-size: 30px; font-weight: 800; }
+.metric-purple { color: var(--purple); }
+.metric-orange { color: var(--orange); }
+.metric-blue { color: var(--blue); }
+
+.stat-row { display: flex; justify-content: space-around; margin: 10px 0; text-align: center; }
+.stat { flex: 1; }
+.stat .num { font-size: 20px; font-weight: 700; color: #fff; display: block; }
+.stat .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+
+.chart-box { position: relative; width: 100%; height: 90px; margin-top: auto; }
+.pie-box { position: relative; width: 100%; height: 175px; margin-top: 8px; }
+
+.total-list p { margin: 8px 0; font-family: monospace; font-size: 14px; }
+.total-list .big { font-size: 34px; font-weight: 800; color: #fff; margin: 4px 0 12px 0; display: block; }
+.text-purple { color: var(--purple); }
+.text-orange { color: var(--orange); }
+.text-blue { color: var(--blue); }
+.status-ok { color: var(--green); font-size: 13px; margin-top: 12px; }
+
+.footer { padding: 6px 26px 34px; color: var(--muted); font-size: 13px; }
+
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }

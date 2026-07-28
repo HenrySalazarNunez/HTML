@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations Mission Control</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ============ LOGIN GATE ============ -->
+    <div id="gate">
+        <div class="lock-box">
+            <h2>&#128274; Members Only Portal</h2>
+            <p>Enter your private key to open the live operations dashboard.</p>
+            <input type="password" id="secretKey" placeholder="Enter passkey...">
+            <button id="accessButton">Verify Identity</button>
+            <p class="hint">Demo keys: <code>Henry777</code>, <code>John123</code>, <code>Manager99</code></p>
+            <p id="gateError" class="err"></p>
+        </div>
+    </div>
+
+    <!-- ============ DASHBOARD APP ============ -->
+    <div id="app" style="display:none;">
+        <div class="dashboard-header">
+            <h1>&#128202; Operations Mission Control</h1>
+            <div class="header-right">
+                <span class="sync-badge">
+                    &#128260; Next Excel Sync: <span id="countdownClock">15:00</span>
+                    &nbsp;|&nbsp; <span id="lastSync">Loading&hellip;</span>
+                </span>
+                <button id="downloadExcelBtn" class="mini-btn">&#128229; CSV</button>
+                <button id="signOutBtn" class="mini-btn ghost">Sign out</button>
+            </div>
+        </div>
+
+        <div class="grid">
+
+            <div class="card">
+                <h3>Pallet Replen</h3>
+                <p class="card-sub">Rate (units/hr avg)</p>
+                <div class="gauge-wrap">
+                    <canvas id="gaugePalletReplen"></canvas>
+                    <div class="gauge-value metric-purple" id="palletReplenRate">--</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat"><span class="num" id="palletReplenUnits">--</span><span class="lbl">Units</span></div>
+                    <div class="stat"><span class="num" id="palletReplenJobs">--</span><span class="lbl">Jobs</span></div>
+                </div>
+                <div class="chart-box"><canvas id="barPalletReplen"></canvas></div>
+            </div>
+
+            <div class="card">
+                <h3>Case Replen</h3>
+                <p class="card-sub">Rate (units/hr avg)</p>
+                <div class="gauge-wrap">
+                    <canvas id="gaugeCaseReplen"></canvas>
+                    <div class="gauge-value metric-orange" id="caseReplenRate">--</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat"><span class="num" id="caseReplenUnits">--</span><span class="lbl">Units</span></div>
+                    <div class="stat"><span class="num" id="caseReplenJobs">--</span><span class="lbl">Jobs</span></div>
+                </div>
+                <div class="chart-box"><canvas id="barCaseReplen"></canvas></div>
+            </div>
+
+            <div class="card">
+                <h3>Pallet Stow</h3>
+                <p class="card-sub">Rate (units/hr avg)</p>
+                <div class="gauge-wrap">
+                    <canvas id="gaugePalletStow"></canvas>
+                    <div class="gauge-value metric-blue" id="palletStowRate">--</div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat"><span class="num" id="palletStowRts">--</span><span class="lbl">RTS</span></div>
+                    <div class="stat"><span class="num" id="palletStowCross">--</span><span class="lbl">Cross</span></div>
+                </div>
+                <div class="chart-box"><canvas id="barPalletStow"></canvas></div>
+            </div>
+
+            <div class="card">
+                <h3>Total Units Monitor</h3>
+                <p class="card-sub">Aggregate volume from the workbook</p>
+                <div class="total-list">
+                    <span class="big" id="totalUnits">--</span>
+                    <p>&#128230; Pallet Replen: <strong class="text-purple" id="totalPalletR">--</strong></p>
+                    <p>&#128230; Case Replen: <strong class="text-orange" id="totalCaseR">--</strong></p>
+                    <p>&#128230; Pallet Stow: <strong class="text-blue" id="totalPalletS">--</strong></p>
+                </div>
+                <p class="status-ok" id="systemStatus">&#128994; Awaiting first sync&hellip;</p>
+            </div>
+
+            <div class="card">
+                <h3>Volume Distribution</h3>
+                <p class="card-sub">Share of total operation volume</p>
+                <div class="pie-box"><canvas id="pieDistribution"></canvas></div>
+            </div>
+
+            <div class="card">
+                <h3>Hourly Throughput</h3>
+                <p class="card-sub">Units per hour (Pallet + Case)</p>
+                <div class="pie-box"><canvas id="lineHourly"></canvas></div>
+            </div>
+
+        </div>
+
+        <div class="footer"><span id="whoami"></span></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

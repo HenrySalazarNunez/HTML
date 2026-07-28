@@ -21,6 +21,14 @@ Serve the repo root with any static server, e.g. `python3 -m http.server 8000`,
 then open `http://localhost:8000/1-father.html`. Python 3 is preinstalled and
 there are no dependencies to install.
 
+### `dashboard/` — self-contained single-page build (recommended to deploy)
+`dashboard/` is a portable, drop-anywhere version of the whole app in one folder:
+`index.html` (login gate + dashboard in one page), `style.css`, `app.js`, its own
+`Developer.xlsm`, and its own `vendor/` libraries. Open `http://localhost:8000/dashboard/`
+(the folder serves `index.html` automatically). To deploy, copy the entire
+`dashboard/` folder to any static host / GitHub Pages — no other files needed.
+It behaves like the root app (same `USER_REGISTRY` login, Excel feed and 15-min sync).
+
 ### Lint / test / build
 None exist. There is nothing to lint, test, or build.
 
